@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+    id="IC Riak Plugin"
+    iconfile="logo.png"
+    description="IC Riak Plugin"
+    tooltip="IC Riak Plugin"
+    category="Transform"
+    classname="com.instaclick.pentaho.plugin.riak.RiakPluginMeta">
+
+    <libraries>
+        <library name="ic-riak-plugin.jar"/>
+    </libraries>
+
+    <localized_category>
+        <category locale="en_US">Transform</category>
+    </localized_category>
+
+    <localized_description>
+        <description locale="en_US">IC Riak Plugin</description>
+    </localized_description>
+
+    <localized_tooltip>
+        <tooltip locale="en_US">IC Riak Plugin</tooltip>
+    </localized_tooltip>
+</plugin>
