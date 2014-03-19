@@ -82,6 +82,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
 
         final String resolver           = environmentSubstitute(meta.getResolver());
         final String bucket             = environmentSubstitute(meta.getBucket());
+        final String vclock             = environmentSubstitute(meta.getVClock());
         final String host               = environmentSubstitute(meta.getHost());
         final String port               = environmentSubstitute(meta.getPort());
         final String value              = environmentSubstitute(meta.getValue());
@@ -120,9 +121,14 @@ public class RiakPlugin extends BaseStep implements StepInterface
         data.keyFieldIndex   = data.outputRowMeta.indexOfValue(key);
         data.port            = Integer.valueOf(port);
         data.resolver        = resolver;
+        data.vclock          = vclock;
         data.bucket          = bucket;
         data.host            = host;
         data.mode            = mode;
+
+        if (data.vclock != null) {
+            data.vclockFieldIndex = data.outputRowMeta.indexOfValue(data.vclock);
+        }
 
         if (mode == RiakPluginData.Mode.PUT && data.valueFieldIndex < 0) {
             throw new RiakException("Unable to retrieve value field : " + value);
@@ -134,15 +140,6 @@ public class RiakPlugin extends BaseStep implements StepInterface
 
         processor = factory.processorFor(this, data, meta);
 
-        /*
-        if ( ! conn.isOpen()) {
-            throw new AMQPException("Unable to open a AMQP connection");
-        }
-
-        if ( ! channel.isOpen()) {
-            throw new AMQPException("Unable to open an AMQP channel");
-        }
-        */
     }
 
     @Override

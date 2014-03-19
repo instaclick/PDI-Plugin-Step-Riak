@@ -68,6 +68,11 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
     private FormData formResolverLabel;
     private FormData formResolverText;
 
+    private Label labelVClock;
+    private Text textVClock;
+    private FormData formVClockLabel;
+    private FormData formVClockText;
+
     private static final List<String> modes = new ArrayList<String>(Arrays.asList(new String[] {
         RiakPluginData.Mode.DELETE.toString(),
         RiakPluginData.Mode.GET.toString(),
@@ -323,6 +328,30 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         textResolver.setLayoutData(formResolverText);
 
+        // VClock line
+        labelVClock = new Label(shell, SWT.RIGHT);
+        labelVClock.setText(getString("RiakPlugin.VClock.Label"));
+        props.setLook(labelVClock);
+
+        formVClockLabel       = new FormData();
+        formVClockLabel.left  = new FormAttachment(0, 0);
+        formVClockLabel.right = new FormAttachment(middle, -margin);
+        formVClockLabel.top   = new FormAttachment(textResolver , margin);
+
+        labelVClock.setLayoutData(formVClockLabel);
+
+        textVClock = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+
+        props.setLook(textVClock);
+        textVClock.addModifyListener(modifyListener);
+
+        formVClockText        = new FormData();
+        formVClockText.left   = new FormAttachment(middle, 0);
+        formVClockText.right  = new FormAttachment(100, 0);
+        formVClockText.top    = new FormAttachment(textResolver, margin);
+
+        textVClock.setLayoutData(formVClockText);
+
         // Some buttons
         wOK     = new Button(shell, SWT.PUSH);
         wCancel = new Button(shell, SWT.PUSH);
@@ -406,6 +435,10 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textBucket.setText(input.getBucket());
         }
 
+        if (input.getVClock() != null) {
+            textVClock.setText(input.getVClock());
+        }
+
         if (input.getHost() != null) {
             textHost.setText(input.getHost());
         }
@@ -459,6 +492,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         input.setResolver(textResolver.getText());
         input.setBucket(textBucket.getText());
+        input.setVClock(textVClock.getText());
         input.setHost(textHost.getText());
         input.setPort(textPort.getText());
         input.setMode(comboMode.getText());

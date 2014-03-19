@@ -71,7 +71,7 @@ public class GetProcessor extends AbstractProcessor
     }
 
     @Override
-    public boolean process(final Object[] r) throws Exception
+    public boolean process(Object[] r) throws Exception
     {
         final String key = getRiakKey(r);
 
@@ -101,11 +101,14 @@ public class GetProcessor extends AbstractProcessor
             return true;
         }
 
-        final String value  = object.getValueAsString();
-        final Object[] row  = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, value);
+        r = RowDataUtil.addValueData(r, data.valueFieldIndex, object.getValueAsString());
+
+        if (data.vclockFieldIndex != null && fetchObject.getVClock() != null) {
+            r = RowDataUtil.addValueData(r, data.vclockFieldIndex, fetchObject.getVClock().asString());
+        }
 
         // put the row to the output row stream
-        putRowToOutput(row);
+        putRowToOutput(r);
 
         return true;
     }

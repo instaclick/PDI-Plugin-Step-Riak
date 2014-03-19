@@ -18,6 +18,7 @@ import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.trans.Trans;
@@ -36,6 +37,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     private static final String FIELD_PORT     = "port";
     private static final String FIELD_BUCKET   = "bucket";
     private static final String FIELD_RESOLVER = "resolver";
+    private static final String FIELD_VCLOCK   = "vclock";
     private static final String FIELD_VALUE    = "value";
     private static final String FIELD_KEY      = "key";
     private static final String FIELD_MODE     = "mode";
@@ -46,6 +48,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     private String host;
     private String port;
     private String value;
+    private String vclock;
     private String key;
 
     public RiakPluginMeta() {
@@ -76,12 +79,16 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             return;
         }
 
-        // a value meta object contains the meta data for a field
-        final ValueMetaInterface b = new ValueMeta(getValue(), ValueMeta.TYPE_STRING);
-        // the name of the step that adds this field
-        b.setOrigin(name);
-        // modify the row structure and add the field this step generates
-        inputRowMeta.addValueMeta(b);
+        final ValueMetaInterface valueField = new ValueMeta(getValue(), ValueMeta.TYPE_STRING);
+
+        valueField.setOrigin(name);
+        inputRowMeta.addValueMeta(valueField);
+
+        if ( ! Const.isEmpty(vclock)) {
+            final ValueMetaInterface vclockField = new ValueMeta(vclock, ValueMeta.TYPE_STRING);
+            valueField.setOrigin(name);
+            inputRowMeta.addValueMeta(vclockField);
+        }
     }
 
     @Override
@@ -108,6 +115,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_MODE, getMode().toString()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_RESOLVER, getResolver()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_BUCKET, getBucket()));
+        bufer.append("   ").append(XMLHandler.addTagValue(FIELD_VCLOCK, getVClock()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_VALUE, getValue()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_HOST, getHost()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_PORT, getPort()));
@@ -122,6 +130,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         try {
             setResolver(XMLHandler.getTagValue(stepnode, FIELD_RESOLVER));
             setBucket(XMLHandler.getTagValue(stepnode, FIELD_BUCKET));
+            setVClock(XMLHandler.getTagValue(stepnode, FIELD_VCLOCK));
             setValue(XMLHandler.getTagValue(stepnode, FIELD_VALUE));
             setMode(XMLHandler.getTagValue(stepnode, FIELD_MODE));
             setHost(XMLHandler.getTagValue(stepnode, FIELD_HOST));
@@ -139,6 +148,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         try {
             setResolver(rep.getStepAttributeString(idStep, FIELD_RESOLVER));
             setBucket(rep.getStepAttributeString(idStep, FIELD_BUCKET));
+            setVClock(rep.getStepAttributeString(idStep, FIELD_VCLOCK));
             setValue(rep.getStepAttributeString(idStep, FIELD_VALUE));
             setMode(rep.getStepAttributeString(idStep, FIELD_MODE));
             setHost(rep.getStepAttributeString(idStep, FIELD_HOST));
@@ -159,6 +169,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             rep.saveStepAttribute(idTransformation, idStep, FIELD_MODE, getMode().toString());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_RESOLVER, getResolver());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_BUCKET, getBucket());
+            rep.saveStepAttribute(idTransformation, idStep, FIELD_VCLOCK, getVClock());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_VALUE, getValue());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_HOST, getHost());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_PORT, getPort());
@@ -190,6 +201,16 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         return mode;
     }
 
+    public void setMode(RiakPluginData.Mode mode)
+    {
+        this.mode = mode;
+    }
+
+    public void setMode(String mode)
+    {
+        this.mode = RiakPluginData.Mode.valueOf(mode);
+    }
+
     public String getResolver()
     {
         return resolver;
@@ -200,14 +221,14 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         this.resolver = resolver;
     }
 
-    public void setMode(RiakPluginData.Mode mode)
+    public String getVClock()
     {
-        this.mode = mode;
+        return vclock;
     }
 
-    public void setMode(String mode)
+    public void setVClock(String vclock)
     {
-        this.mode = RiakPluginData.Mode.valueOf(mode);
+        this.vclock = vclock;
     }
 
     public String getBucket()
