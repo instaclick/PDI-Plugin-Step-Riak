@@ -20,7 +20,7 @@ public class GetProcessor extends AbstractProcessor
         super(bucket, plugin, data);
     }
 
-    protected void putRowToResolveSiblings(final AggregateSiblingsResolver resolver, final Object[] r) throws Exception
+    protected void putRowToResolveSiblings(final FetchObject<IRiakObject> fetchObject, final AggregateSiblingsResolver resolver, final Object[] r) throws Exception
     {
         if (data.resolver == null) {
             throw new RiakException("Conflict resolver step is not defined");
@@ -35,12 +35,8 @@ public class GetProcessor extends AbstractProcessor
         }
 
         for (IRiakObject sibling : siblings) {
-            final String value = sibling.getValueAsString();
-            final Object[] row = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, value);
-
-            plugin.putRowTo(data.outputRowMeta, row, rowSet);
+            plugin.putRowTo(data.outputRowMeta, addRiakObjectData(fetchObject, sibling, r.clone()), rowSet);
         }
-
     }
 
     protected void putRowToOutput(final Object[] r) throws Exception
@@ -54,20 +50,24 @@ public class GetProcessor extends AbstractProcessor
             return;
         }
 
-        // @TODO - filter step output target
         for (RowSet rowSet : rowSetList) {
-
-            plugin.logDebug("RowSet name   : " + rowSet.getName());
-            plugin.logDebug("Resolver name : " + resolverStep);
-
-            if (resolverStep.equals(rowSet.getName())) {
+            if (resolverStep.equals(rowSet.getDestinationStepName())) {
                 continue;
             }
 
-            plugin.logDebug("putRowTo : " + rowSet.getName());
-
             plugin.putRowTo(data.outputRowMeta, r, rowSet);
         }
+    }
+
+    protected Object[] addRiakObjectData(final FetchObject<IRiakObject> fetchObject, final IRiakObject object, Object[] r) throws Exception
+    {
+        r = RowDataUtil.addValueData(r, data.valueFieldIndex, object.getValueAsString());
+
+        if (data.vclockFieldIndex != null && fetchObject.getVClock() != null) {
+            r = RowDataUtil.addValueData(r, data.vclockFieldIndex, fetchObject.getVClock().asString());
+        }
+
+        return r;
     }
 
     @Override
@@ -86,11 +86,12 @@ public class GetProcessor extends AbstractProcessor
             .execute();
 
         if (resolver.hasSiblings()) {
-            putRowToResolveSiblings(resolver, r);
 
             if (plugin.isDebug()) {
-                plugin.logDebug("Siblings for key : " + key);
+                plugin.logDebug("'" + key + "' has siblings");
             }
+
+            putRowToResolveSiblings(fetchObject, resolver, r);
 
             return true;
         }
@@ -101,14 +102,7 @@ public class GetProcessor extends AbstractProcessor
             return true;
         }
 
-        r = RowDataUtil.addValueData(r, data.valueFieldIndex, object.getValueAsString());
-
-        if (data.vclockFieldIndex != null && fetchObject.getVClock() != null) {
-            r = RowDataUtil.addValueData(r, data.vclockFieldIndex, fetchObject.getVClock().asString());
-        }
-
-        // put the row to the output row stream
-        putRowToOutput(r);
+        putRowToOutput(addRiakObjectData(fetchObject, object, r));
 
         return true;
     }

@@ -128,6 +128,10 @@ public class RiakPlugin extends BaseStep implements StepInterface
 
         if (data.vclock != null) {
             data.vclockFieldIndex = data.outputRowMeta.indexOfValue(data.vclock);
+
+            if (data.vclockFieldIndex < 0) {
+                throw new RiakException("Unable to retrieve vclock field : " + vclock);
+            }
         }
 
         if (mode == RiakPluginData.Mode.PUT && data.valueFieldIndex < 0) {
