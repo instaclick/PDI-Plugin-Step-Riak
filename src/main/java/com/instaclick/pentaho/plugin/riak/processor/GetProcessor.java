@@ -2,7 +2,6 @@ package com.instaclick.pentaho.plugin.riak.processor;
 
 import com.basho.riak.client.IRiakObject;
 import com.basho.riak.client.RiakException;
-import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.bucket.Bucket;
 import com.basho.riak.client.operations.FetchObject;
 import com.instaclick.pentaho.plugin.riak.AggregateSiblingsResolver;

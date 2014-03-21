@@ -19,35 +19,35 @@ abstract class AbstractProcessor implements Processor
 
     protected String getRiakKey(final Object[] r) throws Exception
     {
-        if (r.length < data.keyFieldIndex || r[data.keyFieldIndex] == null) {
-            String putErrorMessage = plugin.getLinesRead() + " - Ignore invalid key row";
-
-            if (plugin.isDebug()) {
-                plugin.logDebug(putErrorMessage);
-            }
-
-            plugin.putError(plugin.getInputRowMeta(), r, 1, putErrorMessage, null, "ICRiakPlugin001");
-
-            return null;
+        if (r.length > data.keyFieldIndex) {
+            return (r[data.keyFieldIndex] == null) ? null : String.valueOf(r[data.keyFieldIndex]);
         }
 
-        return String.valueOf(r[data.keyFieldIndex]);
+        final String message = plugin.getLinesRead() + " - Invalid key row";
+
+        if (plugin.isDebug()) {
+            plugin.logDebug(message);
+        }
+
+        plugin.putError(plugin.getInputRowMeta(), r, 1, message, null, "ICRiakPlugin001");
+
+        return null;
     }
 
     protected String getRiakValue(final Object[] r) throws Exception
     {
-        if (r.length < data.valueFieldIndex || r[data.valueFieldIndex] == null) {
-            String putErrorMessage = plugin.getLinesRead() + " - Ignore invalid value row";
-
-            if (plugin.isDebug()) {
-                plugin.logDebug(putErrorMessage);
-            }
-
-            plugin.putError(plugin.getInputRowMeta(), r, 1, putErrorMessage, null, "ICRiakPlugin002");
-
-            return null;
+        if (r.length > data.valueFieldIndex) {
+            return (r[data.valueFieldIndex] == null) ? null : String.valueOf(r[data.valueFieldIndex]);
         }
 
-        return String.valueOf(r[data.valueFieldIndex]);
+        final String message = plugin.getLinesRead() + " - Invalid value row";
+
+        if (plugin.isDebug()) {
+            plugin.logDebug(message);
+        }
+
+        plugin.putError(plugin.getInputRowMeta(), r, 1, message, null, "ICRiakPlugin002");
+
+        return null;
     }
 }
