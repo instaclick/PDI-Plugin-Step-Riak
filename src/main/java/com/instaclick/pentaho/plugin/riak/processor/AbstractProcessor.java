@@ -20,7 +20,7 @@ abstract class AbstractProcessor implements Processor
     protected String getRiakKey(final Object[] r) throws Exception
     {
         if (r.length > data.keyFieldIndex) {
-            return (r[data.keyFieldIndex] == null) ? null : String.valueOf(r[data.keyFieldIndex]);
+            return (r[data.keyFieldIndex] == null) ? null : r[data.keyFieldIndex].toString();
         }
 
         final String message = plugin.getLinesRead() + " - Invalid key row";
@@ -37,7 +37,7 @@ abstract class AbstractProcessor implements Processor
     protected String getRiakValue(final Object[] r) throws Exception
     {
         if (r.length > data.valueFieldIndex) {
-            return (r[data.valueFieldIndex] == null) ? null : String.valueOf(r[data.valueFieldIndex]);
+            return (r[data.valueFieldIndex] == null) ? null : r[data.valueFieldIndex].toString();
         }
 
         final String message = plugin.getLinesRead() + " - Invalid value row";
