@@ -2,39 +2,38 @@ package com.instaclick.pentaho.plugin.riak.processor;
 
 import com.basho.riak.client.IRiakObject;
 import com.basho.riak.client.RiakException;
-import com.basho.riak.client.bucket.Bucket;
-import com.basho.riak.client.operations.FetchObject;
-import com.instaclick.pentaho.plugin.riak.AggregateSiblingsResolver;
+import com.basho.riak.client.cap.VClock;
+import com.basho.riak.client.raw.RawClient;
+import com.basho.riak.client.raw.RiakResponse;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
-import java.util.Collection;
 import java.util.List;
 import org.pentaho.di.core.RowSet;
 import org.pentaho.di.core.row.RowDataUtil;
 
 public class GetProcessor extends AbstractProcessor
 {
-    public GetProcessor(final Bucket bucket, final RiakPlugin plugin, final RiakPluginData data)
+    public GetProcessor(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
     {
-        super(bucket, plugin, data);
+        super(client, plugin, data);
     }
 
-    protected void putRowToResolveSiblings(final FetchObject<IRiakObject> fetchObject, final AggregateSiblingsResolver resolver, final Object[] r) throws Exception
+    protected void putRowToResolveSiblings(final RiakResponse response, final Object[] r) throws Exception
     {
         if (data.resolver == null) {
             throw new RiakException("Conflict resolver step is not defined");
         }
 
-        final String stepName                  = data.resolver;
-        final Collection<IRiakObject> siblings = resolver.getSiblings();
-        final RowSet rowSet                    = plugin.findOutputRowSet(stepName);
+        final String stepName        = data.resolver;
+        final IRiakObject[] siblings = response.getRiakObjects();
+        final RowSet rowSet          = plugin.findOutputRowSet(stepName);
 
         if (rowSet == null) {
             throw new RiakException("Unable to find conflict resolver step : " + stepName);
         }
 
         for (IRiakObject sibling : siblings) {
-            plugin.putRowTo(data.outputRowMeta, addRiakObjectData(fetchObject, sibling, r.clone()), rowSet);
+            plugin.putRowTo(data.outputRowMeta, addRiakObjectData(response.getVclock(), sibling, r.clone()), rowSet);
         }
     }
 
@@ -58,12 +57,12 @@ public class GetProcessor extends AbstractProcessor
         }
     }
 
-    protected Object[] addRiakObjectData(final FetchObject<IRiakObject> fetchObject, final IRiakObject object, Object[] r) throws Exception
+    protected Object[] addRiakObjectData(final VClock vClock, final IRiakObject object, Object[] r) throws Exception
     {
         r = RowDataUtil.addValueData(r, data.valueFieldIndex, object.getValueAsString());
 
-        if (data.vclockFieldIndex != null && fetchObject.getVClock() != null) {
-            r = RowDataUtil.addValueData(r, data.vclockFieldIndex, fetchObject.getVClock().asString());
+        if (data.vclockFieldIndex != null && vClock != null) {
+            r = RowDataUtil.addValueData(r, data.vclockFieldIndex, vClock.getBytes());
         }
 
         return r;
@@ -72,36 +71,31 @@ public class GetProcessor extends AbstractProcessor
     @Override
     public boolean process(Object[] r) throws Exception
     {
-        final String key = getRiakKey(r);
-
-        if (key == null) {
+        if ( ! hasRiakKey(r)) {
             return false;
         }
 
-        final AggregateSiblingsResolver resolver = new AggregateSiblingsResolver();
-        final FetchObject<IRiakObject> fetchObject = bucket.fetch(key);
-        final IRiakObject object                   = fetchObject
-            .withResolver(resolver)
-            .execute();
+        final String key            = getRiakKey(r);
+        final RiakResponse response = client.fetch(data.bucket, key);
 
-        if (resolver.hasSiblings()) {
-
-            if (plugin.isDebug()) {
-                plugin.logDebug("'" + key + "' has siblings");
-            }
-
-            putRowToResolveSiblings(fetchObject, resolver, r);
-
-            return true;
-        }
-
-        if (object == null) {
+        if (response == null || ! response.hasValue()) {
             putRowToOutput(r);
 
             return true;
         }
 
-        putRowToOutput(addRiakObjectData(fetchObject, object, r));
+        if (response.hasSiblings()) {
+
+            if (plugin.isDebug()) {
+                plugin.logDebug("'" + key + "' has siblings");
+            }
+
+            putRowToResolveSiblings(response, r);
+
+            return true;
+        }
+
+        putRowToOutput(addRiakObjectData(response.getVclock(), response.getRiakObjects()[0], r));
 
         return true;
     }

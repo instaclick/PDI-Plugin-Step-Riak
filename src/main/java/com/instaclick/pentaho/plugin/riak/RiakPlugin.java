@@ -13,6 +13,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import static com.instaclick.pentaho.plugin.riak.Messages.getString;
 import com.instaclick.pentaho.plugin.riak.processor.Processor;
 import com.instaclick.pentaho.plugin.riak.processor.ProcessorFactory;
+import java.io.IOException;
 
 public class RiakPlugin extends BaseStep implements StepInterface
 {
@@ -20,7 +21,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
     private Processor processor;
     private RiakPluginData data;
     private RiakPluginMeta meta;
-    
+
     public RiakPlugin(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans)
     {
         super(stepMeta, stepDataInterface, copyNr, transMeta, trans);
@@ -44,22 +45,17 @@ public class RiakPlugin extends BaseStep implements StepInterface
 
             try {
                 initPlugin();
-            } catch (com.basho.riak.client.RiakException e) {
-                throw new RiakException(e.getMessage(), e);
+            } catch (IOException e) {
+                throw new RiakPluginException(e.getMessage(), e);
             }
         }
+
         try {
             return processor.process(r);
         } catch (Exception ex) {
-            throw new RiakException(ex.getMessage(), ex);
+            throw new RiakPluginException(ex.getMessage(), ex);
         }
     }
-
-    private void flush()
-    {
-        logMinimal("Flush invoked");
-    }
-
 
     @Override
     public boolean init(StepMetaInterface smi, StepDataInterface sdi)
@@ -73,7 +69,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
     /**
      * Initialize
      */
-    private void initPlugin() throws KettleStepException, com.basho.riak.client.RiakException
+    private void initPlugin() throws KettleStepException, IOException
     {
         // clone the input row structure and place it in our data object
         data.outputRowMeta = (RowMetaInterface) getInputRowMeta().clone();
@@ -97,23 +93,23 @@ public class RiakPlugin extends BaseStep implements StepInterface
         logMinimal(getString("RiakPlugin.Key.Label")    + " : '" + key    + "'");
 
         if (host == null) {
-            throw new RiakException("Invalid riak host name : " + host);
+            throw new RiakPluginException("Invalid riak host name : " + host);
         }
 
         if (port == null) {
-            throw new RiakException("Invalid riak port : " + port);
+            throw new RiakPluginException("Invalid riak port : " + port);
         }
 
         if (bucket == null) {
-            throw new RiakException("Invalid bucket name : " + bucket);
+            throw new RiakPluginException("Invalid bucket name : " + bucket);
         }
 
         if (key == null) {
-            throw new RiakException("Invalid key field : " + key);
+            throw new RiakPluginException("Invalid key field : " + key);
         }
 
         if (mode == RiakPluginData.Mode.PUT && value == null) {
-            throw new RiakException("Invalid value field : " + value);
+            throw new RiakPluginException("Invalid value field : " + value);
         }
 
         // get field index
@@ -130,16 +126,16 @@ public class RiakPlugin extends BaseStep implements StepInterface
             data.vclockFieldIndex = data.outputRowMeta.indexOfValue(data.vclock);
 
             if (data.vclockFieldIndex < 0) {
-                throw new RiakException("Unable to retrieve vclock field : " + vclock);
+                throw new RiakPluginException("Unable to retrieve vclock field : " + vclock);
             }
         }
 
         if (mode == RiakPluginData.Mode.PUT && data.valueFieldIndex < 0) {
-            throw new RiakException("Unable to retrieve value field : " + value);
+            throw new RiakPluginException("Unable to retrieve value field : " + value);
         }
 
         if (data.keyFieldIndex < 0) {
-            throw new RiakException("Unable to retrieve key field : " + key);
+            throw new RiakPluginException("Unable to retrieve key field : " + key);
         }
 
         processor = factory.processorFor(this, data, meta);
@@ -152,6 +148,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         meta = (RiakPluginMeta) smi;
         data = (RiakPluginData) sdi;
 
+        processor.shutdown();
         super.dispose(smi, sdi);
     }
 }

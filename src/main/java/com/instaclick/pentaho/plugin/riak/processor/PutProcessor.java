@@ -1,27 +1,36 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.bucket.Bucket;
+import com.basho.riak.client.builders.RiakObjectBuilder;
+import com.basho.riak.client.raw.RawClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 
 public class PutProcessor extends AbstractProcessor
 {
-    public PutProcessor(final Bucket bucket, final RiakPlugin plugin, final RiakPluginData data)
+    public PutProcessor(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
     {
-        super(bucket, plugin, data);
+        super(client, plugin, data);
     }
 
     @Override
     public boolean process(final Object[] r) throws Exception
     {
-        final String key   = getRiakKey(r);
-        final String value = getRiakValue(r);
-
-        if (key == null) {
+        if ( ! hasRiakKey(r)) {
             return false;
         }
 
-        bucket.store(key, value).execute();
+        final String key                = getRiakKey(r);
+        final String value              = getRiakValue(r);
+        final byte[] vclock             = getRiakVClock(r);
+        final RiakObjectBuilder builder = RiakObjectBuilder
+            .newBuilder(data.bucket, key)
+            .withValue(value);
+
+        if (vclock != null) {
+            builder.withVClock(vclock);
+        }
+
+        client.store(builder.build());
         plugin.putRow(data.outputRowMeta, r);
 
         return true;

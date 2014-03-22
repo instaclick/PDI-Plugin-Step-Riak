@@ -1,9 +1,6 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.IRiakObject;
-import com.basho.riak.client.bucket.Bucket;
-import com.basho.riak.client.operations.FetchObject;
-import com.instaclick.pentaho.plugin.riak.AggregateSiblingsResolver;
+import com.basho.riak.client.raw.RawClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 import org.junit.Test;
@@ -18,16 +15,17 @@ import org.pentaho.di.core.row.RowMetaInterface;
 
 public class GetProcessorTest
 {
-    Bucket bucket;
+    RawClient client;
     RiakPlugin plugin;
     RiakPluginData data;
 
     @Before
     public void setUp()
     {
-        plugin = mock(RiakPlugin.class);
-        data   = mock(RiakPluginData.class);
-        bucket = mock(Bucket.class, RETURNS_MOCKS);
+        client      = mock(RawClient.class, RETURNS_MOCKS);
+        data        = mock(RiakPluginData.class);
+        plugin      = mock(RiakPlugin.class);
+        data.bucket = "test_bucket";
     }
 
     @Test
@@ -37,12 +35,12 @@ public class GetProcessorTest
         final String key             = "bar";
         final Object[] row           = new Object[] {key, value};
         final RowMetaInterface meta  = mock(RowMetaInterface.class);
-        final GetProcessor processor = new GetProcessor(bucket, plugin, data);
+        final GetProcessor processor = new GetProcessor(client, plugin, data);
 
         data.keyFieldIndex = 2;
         data.outputRowMeta = meta;
 
         assertFalse(processor.process(row));
-        verify(bucket, never()).delete(eq(key));
+        verify(client, never()).delete(eq(data.bucket), eq(key));
     }
 }

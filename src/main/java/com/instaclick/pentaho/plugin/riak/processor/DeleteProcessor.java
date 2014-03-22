@@ -1,26 +1,24 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.bucket.Bucket;
+import com.basho.riak.client.raw.RawClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 
 public class DeleteProcessor extends AbstractProcessor
 {
-    public DeleteProcessor(final Bucket bucket, final RiakPlugin plugin, final RiakPluginData data)
+    public DeleteProcessor(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
     {
-        super(bucket, plugin, data);
+        super(client, plugin, data);
     }
 
     @Override
     public boolean process(final Object[] r) throws Exception
     {
-        final String key = getRiakKey(r);
-
-        if (key == null) {
+        if ( ! hasRiakKey(r)) {
             return false;
         }
 
-        bucket.delete(key).execute();
+        client.delete(data.bucket, getRiakKey(r));
         plugin.putRow(data.outputRowMeta, r);
 
         return true;

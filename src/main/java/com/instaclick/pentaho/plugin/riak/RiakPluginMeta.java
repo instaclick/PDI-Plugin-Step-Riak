@@ -85,7 +85,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         inputRowMeta.addValueMeta(valueField);
 
         if ( ! Const.isEmpty(vclock)) {
-            final ValueMetaInterface vclockField = new ValueMeta(vclock, ValueMeta.TYPE_STRING);
+            final ValueMetaInterface vclockField = new ValueMeta(vclock, ValueMeta.TYPE_BINARY);
             valueField.setOrigin(name);
             inputRowMeta.addValueMeta(vclockField);
         }

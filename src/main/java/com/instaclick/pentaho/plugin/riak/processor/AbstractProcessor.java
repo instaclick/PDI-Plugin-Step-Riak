@@ -1,6 +1,6 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.bucket.Bucket;
+import com.basho.riak.client.raw.RawClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 
@@ -8,46 +8,84 @@ abstract class AbstractProcessor implements Processor
 {
     protected final RiakPluginData data;
     protected final RiakPlugin plugin;
-    protected final Bucket bucket;
+    protected final RawClient client;
 
-    public AbstractProcessor(final Bucket bucket, final RiakPlugin plugin, final RiakPluginData data)
+    public AbstractProcessor(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
     {
         this.plugin = plugin;
-        this.bucket = bucket;
+        this.client = client;
         this.data   = data;
     }
 
     protected String getRiakKey(final Object[] r) throws Exception
     {
-        if (r.length > data.keyFieldIndex) {
+        if (hasRiakKey(r)) {
             return (r[data.keyFieldIndex] == null) ? null : r[data.keyFieldIndex].toString();
         }
 
-        final String message = plugin.getLinesRead() + " - Invalid key row";
-
-        if (plugin.isDebug()) {
-            plugin.logDebug(message);
-        }
-
-        plugin.putError(plugin.getInputRowMeta(), r, 1, message, null, "ICRiakPlugin001");
+        logUndefinedRow(r, "Invalid key row", "ICRiakPlugin001");
 
         return null;
     }
 
     protected String getRiakValue(final Object[] r) throws Exception
     {
-        if (r.length > data.valueFieldIndex) {
+        if (hasRiakValue(r)) {
             return (r[data.valueFieldIndex] == null) ? null : r[data.valueFieldIndex].toString();
         }
 
-        final String message = plugin.getLinesRead() + " - Invalid value row";
-
-        if (plugin.isDebug()) {
-            plugin.logDebug(message);
-        }
-
-        plugin.putError(plugin.getInputRowMeta(), r, 1, message, null, "ICRiakPlugin002");
+        logUndefinedRow(r, "Invalid value row", "ICRiakPlugin002");
 
         return null;
+    }
+
+    protected byte[] getRiakVClock(final Object[] r) throws Exception
+    {
+        if (hasRiakVClock(r)) {
+            return ((r[data.vclockFieldIndex] == null) ? null : (byte[]) r[data.vclockFieldIndex]);
+        }
+
+        return null;
+    }
+
+    protected boolean hasRiakVClock(final Object[] r) throws Exception
+    {
+        return rowContains(r, data.vclockFieldIndex);
+    }
+
+    protected boolean hasRiakKey(final Object[] r) throws Exception
+    {
+        return rowContains(r, data.keyFieldIndex);
+    }
+
+    protected boolean hasRiakValue(final Object[] r) throws Exception
+    {
+        return rowContains(r, data.valueFieldIndex);
+    }
+
+    protected boolean rowContains(final Object[] r, final Integer index) throws Exception
+    {
+        if (index == null || index < 0) {
+            return false;
+        }
+
+        return (r.length > index);
+    }
+
+    protected void logUndefinedRow(final Object[] r, final String log, final String code) throws Exception
+    {
+        final String msg = plugin.getLinesRead() + " - " + log;
+
+        if (plugin.isDebug()) {
+            plugin.logDebug(msg);
+        }
+
+        plugin.putError(plugin.getInputRowMeta(), r, 1, msg, null, code);
+    }
+
+    @Override
+    public void shutdown()
+    {
+        client.shutdown();
     }
 }

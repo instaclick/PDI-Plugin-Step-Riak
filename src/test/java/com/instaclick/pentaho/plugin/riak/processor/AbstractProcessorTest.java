@@ -1,28 +1,29 @@
 
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.bucket.Bucket;
+import com.basho.riak.client.raw.RawClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
+import com.instaclick.pentaho.plugin.riak.RiakPluginException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
 import org.pentaho.di.core.row.RowMetaInterface;
 
 public class AbstractProcessorTest
 {
-    Bucket bucket;
+    RawClient client;
     RiakPlugin plugin;
     RiakPluginData data;
 
     @Before
     public void setUp()
     {
-        plugin = mock(RiakPlugin.class);
-        data   = mock(RiakPluginData.class);
-        bucket = mock(Bucket.class, RETURNS_MOCKS);
+        client      = mock(RawClient.class, RETURNS_MOCKS);
+        data        = mock(RiakPluginData.class);
+        plugin      = mock(RiakPlugin.class);
+        data.bucket = "test_bucket";
     }
 
     @Test
@@ -31,7 +32,7 @@ public class AbstractProcessorTest
         final String value                  = null;
         final String key                    = "riak_key";
         final Object[] row                  = new Object[] {key, value};
-        final AbstractProcessor processor   = new AbstractProcessorImpl(bucket, plugin, data);
+        final AbstractProcessor processor   = new AbstractProcessorImpl(client, plugin, data);
 
         data.keyFieldIndex   = 0;
         data.valueFieldIndex = 1;
@@ -45,7 +46,7 @@ public class AbstractProcessorTest
         final String key                    = "riak_key";
         final String value                  = "riak_value";
         final Object[] row                  = new Object[] {key, value};
-        final AbstractProcessor processor   = new AbstractProcessorImpl(bucket, plugin, data);
+        final AbstractProcessor processor   = new AbstractProcessorImpl(client, plugin, data);
 
         data.keyFieldIndex   = 0;
         data.valueFieldIndex = 1;
@@ -59,7 +60,7 @@ public class AbstractProcessorTest
         final String key                    = "riak_key";
         final Object[] row                  = new Object[] {key};
         final RowMetaInterface meta         = mock(RowMetaInterface.class);
-        final AbstractProcessor processor   = new AbstractProcessorImpl(bucket, plugin, data);
+        final AbstractProcessor processor   = new AbstractProcessorImpl(client, plugin, data);
 
         data.keyFieldIndex   = 3;
         data.valueFieldIndex = 1;
@@ -72,14 +73,13 @@ public class AbstractProcessorTest
         verify(plugin).putError(eq(meta), eq(row), eq(1L), eq("1 - Invalid key row"), isNull(String.class), eq("ICRiakPlugin001"));
     }
 
-    @Test
     public void testGetInvalidRiakValue() throws Exception
     {
         final String key                    = "riak_key";
         final String value                  = "riak_value";
         final Object[] row                  = new Object[] {key, value};
         final RowMetaInterface meta         = mock(RowMetaInterface.class);
-        final AbstractProcessor processor   = new AbstractProcessorImpl(bucket, plugin, data);
+        final AbstractProcessor processor   = new AbstractProcessorImpl(client, plugin, data);
 
         data.keyFieldIndex   = 0;
         data.valueFieldIndex = 2;
@@ -97,7 +97,7 @@ public class AbstractProcessorTest
     {
         final Object[] row                  = new Object[] {null, null};
         final RowMetaInterface meta         = mock(RowMetaInterface.class);
-        final AbstractProcessor processor   = new AbstractProcessorImpl(bucket, plugin, data);
+        final AbstractProcessor processor   = new AbstractProcessorImpl(client, plugin, data);
 
         data.keyFieldIndex   = 0;
         data.valueFieldIndex = 1;
@@ -113,9 +113,9 @@ public class AbstractProcessorTest
 
     public class AbstractProcessorImpl extends AbstractProcessor
     {
-        public AbstractProcessorImpl(final Bucket bucket, final RiakPlugin plugin, final RiakPluginData data)
+        public AbstractProcessorImpl(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
         {
-            super(bucket, plugin, data);
+            super(client, plugin, data);
         }
 
         @Override
