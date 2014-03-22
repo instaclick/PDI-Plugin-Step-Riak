@@ -1,5 +1,6 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
+import com.basho.riak.client.IRiakObject;
 import com.basho.riak.client.raw.RawClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
@@ -39,7 +40,7 @@ public class PutProcessorTest
 
         assertTrue(processor.process(row));
 
-        // verify(bucket, only()).store(eq(key), eq(value));
+        verify(client, only()).store(any(IRiakObject.class));
         verify(plugin, only()).putRow(eq(meta), eq(row));
     }
 
