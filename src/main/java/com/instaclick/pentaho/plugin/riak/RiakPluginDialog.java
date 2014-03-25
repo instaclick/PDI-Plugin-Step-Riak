@@ -97,9 +97,16 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         @Override
         public void widgetSelected(SelectionEvent e) {
             textValue.setEnabled(false);
+            textVClock.setEnabled(false);
+            textResolver.setEnabled(false);
 
             if ( ! RiakPluginData.Mode.DELETE.toString().equals(comboMode.getText())) {
                 textValue.setEnabled(true);
+                textVClock.setEnabled(true);
+            }
+
+            if (RiakPluginData.Mode.GET.toString().equals(comboMode.getText())) {
+                textResolver.setEnabled(true);
             }
         }
     };
@@ -426,6 +433,18 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         }
 
         comboMode.select(index);
+        textValue.setEnabled(false);
+        textVClock.setEnabled(false);
+        textResolver.setEnabled(false);
+
+        if (RiakPluginData.Mode.DELETE != input.getMode()) {
+            textValue.setEnabled(true);
+            textVClock.setEnabled(true);
+        }
+
+        if (RiakPluginData.Mode.GET == input.getMode()) {
+            textResolver.setEnabled(true);
+        }
 
         if (input.getResolver() != null) {
             textResolver.setText(input.getResolver());

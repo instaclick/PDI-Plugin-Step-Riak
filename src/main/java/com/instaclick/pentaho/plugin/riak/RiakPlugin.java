@@ -122,7 +122,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         data.host            = host;
         data.mode            = mode;
 
-        if (data.vclock != null) {
+        if (mode != RiakPluginData.Mode.DELETE && data.vclock != null) {
             data.vclockFieldIndex = data.outputRowMeta.indexOfValue(data.vclock);
 
             if (data.vclockFieldIndex < 0) {
