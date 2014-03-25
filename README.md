@@ -1,6 +1,8 @@
 IC Riak Plugin
 ==============
 
+[![Build Status](https://travis-ci.org/instaclick/PDI-Plugin-Step-Riak.svg?branch=master)](https://travis-ci.org/instaclick/PDI-Plugin-Step-Riak)
+
 Building
 --------
 The Riak Riak Plugin is built with maven for dependency management.
