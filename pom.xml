@@ -14,7 +14,8 @@
         <kettle.version>4.1.4-SNAPSHOT</kettle.version>
         <guava.version>14.0.1</guava.version>
         <skipTests>false</skipTests>
-        <pluginInstallDir>/Applications/pentaho/pdi/design-tools/data-integration/plugins/steps/ic-riak-plugin</pluginInstallDir>
+        <pentahoInstall>false</pentahoInstall>
+        <pentahoInstallDir>/Applications/pentaho/pdi/design-tools/data-integration/plugins/steps/ic-riak-plugin</pentahoInstallDir>
     </properties>
     <dependencies>
         <dependency>
@@ -166,10 +167,10 @@
                         <id>antrun-install-riak-plugin</id>
                         <phase>install</phase>
                         <configuration>
-                            <target name="install-riak-plugin">
-                                <delete dir="${pluginInstallDir}"/>
-                                <mkdir dir="${pluginInstallDir}" />
-                                <copy todir="${pluginInstallDir}">
+                            <target name="install-riak-plugin" if="pentahoInstall">
+                                <delete dir="${pentahoInstallDir}"/>
+                                <mkdir dir="${pentahoInstallDir}" />
+                                <copy todir="${pentahoInstallDir}">
                                     <fileset dir="${project.plugin.deploy}" includes="**/*.*" />
                                 </copy>
                             </target>
