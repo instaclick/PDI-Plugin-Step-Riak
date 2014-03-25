@@ -1,10 +1,6 @@
 language: java
 
-before_script:
-    - mvn clean
-
-script:
-    - mvn -DpentahoInstall=false -DpentahoInstallDir=./target/pdi/plugins/steps/ic-riak-plugin test
-
-after_success:
-  - mvn clean cobertura:cobertura coveralls:cobertura
+install: mvn -DpentahoInstall=false -DpentahoInstallDir=./target/pdi/plugins/steps/ic-riak-plugin install
+script: mvn -DpentahoInstall=false -DpentahoInstallDir=./target/pdi/plugins/steps/ic-riak-plugin test
+# coveralls
+after_success: mvn clean cobertura:cobertura coveralls:cobertura
