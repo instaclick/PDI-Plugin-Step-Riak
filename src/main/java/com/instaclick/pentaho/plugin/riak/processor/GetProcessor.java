@@ -1,12 +1,12 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
 import com.basho.riak.client.IRiakObject;
-import com.basho.riak.client.RiakException;
 import com.basho.riak.client.cap.VClock;
 import com.basho.riak.client.raw.RawClient;
 import com.basho.riak.client.raw.RiakResponse;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
+import com.instaclick.pentaho.plugin.riak.RiakPluginException;
 import java.util.List;
 import org.pentaho.di.core.RowSet;
 import org.pentaho.di.core.row.RowDataUtil;
@@ -21,7 +21,7 @@ public class GetProcessor extends AbstractProcessor
     protected void putRowToResolveSiblings(final RiakResponse response, final Object[] r) throws Exception
     {
         if (data.resolver == null) {
-            throw new RiakException("Conflict resolver step is not defined");
+            throw new RiakPluginException("Conflict resolver step is not defined");
         }
 
         final String stepName        = data.resolver;
@@ -29,7 +29,7 @@ public class GetProcessor extends AbstractProcessor
         final RowSet rowSet          = plugin.findOutputRowSet(stepName);
 
         if (rowSet == null) {
-            throw new RiakException("Unable to find conflict resolver step : " + stepName);
+            throw new RiakPluginException("Unable to find conflict resolver step : " + stepName);
         }
 
         for (IRiakObject sibling : siblings) {
