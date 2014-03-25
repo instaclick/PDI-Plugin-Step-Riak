@@ -1,4 +1,7 @@
 language: java
 
 script:
-    - mvn test
+    - mvn -DpentahoInstall=false -DpentahoInstallDir=./target/plugins/steps/ic-riak-plugin test
+
+after_success:
+  - mvn clean cobertura:cobertura coveralls:cobertura
