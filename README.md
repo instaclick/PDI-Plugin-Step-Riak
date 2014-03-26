@@ -30,3 +30,5 @@ PDI Step Configuration
 | Key                   | Field that will be used as riak key                                           |
 | Value                 | Field that will be used as riak value                                         |
 | VClock                | Field that will be used as riak vclock                                        |
+
+![Get Resolver](http://s28.postimg.org/r2970e2kt/riak_get_resolver.png)
