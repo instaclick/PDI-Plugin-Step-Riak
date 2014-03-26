@@ -22,9 +22,11 @@ PDI Step Configuration
 
 | Property              | Description                                                                   |
 | ----------------------|:-----------------------------------------------------------------------------:|
-| Mode                  | If the step will PUT,GET or DELETE rows                                       |
+| Mode                  | PUT,GET or DELETE                                                             |
 | Host                  | Riak Host                                                                     |
 | Port                  | Riak Port                                                                     |
 | Bucket                | Riak Bucket name                                                              |
+| Resolver              | Conflic resolver Step                                                         |
 | Key                   | Field that will be used as riak key                                           |
 | Value                 | Field that will be used as riak value                                         |
+| VClock                | Field that will be used as riak vclock                                        |
