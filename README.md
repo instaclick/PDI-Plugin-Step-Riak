@@ -16,6 +16,9 @@ All you'll need to get started is maven.
 This will produce a pentaho plugin in ``target/ic-riak-plugin-pdi-<version>.tar``
 This archive can then be extracted into your Pentaho Data Integration plugin directory.
 
+Download Packages
+-----------------
+https://github.com/instaclick/pdi-marketplace-packages
 
 PDI Step Configuration
 -----------------------
