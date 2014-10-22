@@ -26,11 +26,11 @@ public class GetProcessorTest
     @Before
     public void setUp()
     {
-        client      = mock(RiakClient.class, RETURNS_MOCKS);
-        data        = mock(RiakPluginData.class);
-        plugin      = mock(RiakPlugin.class);
-        data.bucket = "test_bucket";
-        data.bucketType   = "test_type";
+        client          = mock(RiakClient.class, RETURNS_MOCKS);
+        data            = mock(RiakPluginData.class);
+        plugin          = mock(RiakPlugin.class);
+        data.bucket     = "test_bucket";
+        data.bucketType = "test_type";
     }
 
     @Test

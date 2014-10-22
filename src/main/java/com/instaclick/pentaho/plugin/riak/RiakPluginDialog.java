@@ -301,7 +301,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formValueLabel       = new FormData();
         formValueLabel.left  = new FormAttachment(0, 0);
         formValueLabel.right = new FormAttachment(middle, -margin);
-        formValueLabel.top   = new FormAttachment(textBucket , margin);
+        formValueLabel.top   = new FormAttachment(textBucketType , margin);
 
         labelValue.setLayoutData(formValueLabel);
 
@@ -313,7 +313,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formValueText        = new FormData();
         formValueText.left   = new FormAttachment(middle, 0);
         formValueText.right  = new FormAttachment(100, 0);
-        formValueText.top    = new FormAttachment(textBucket, margin);
+        formValueText.top    = new FormAttachment(textBucketType, margin);
 
         textValue.setLayoutData(formValueText);
 

@@ -34,7 +34,7 @@ public class GetProcessor extends AbstractProcessor
             throw new RiakPluginException("Unable to find conflict resolver step : " + stepName);
         }
 
-        for (RiakObject sibling : siblings) {
+        for (final RiakObject sibling : siblings) {
             plugin.putRowTo(data.outputRowMeta, addRiakObjectData(vClock, sibling, r.clone()), rowSet);
         }
     }
