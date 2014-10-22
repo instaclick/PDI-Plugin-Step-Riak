@@ -30,26 +30,31 @@ public class RiakPlugin extends BaseStep implements StepInterface
     }
 
     @Override
-    public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException, KettleStepException
+    public boolean processRow(final StepMetaInterface smi, final StepDataInterface sdi) throws KettleException, KettleStepException
     {
         meta       = (RiakPluginMeta) smi;
         data       = (RiakPluginData) sdi;
         Object[] r = getRow();
 
+        if (first) {
+            first = false;
+
+            if (r == null) {
+                setOutputDone();
+                return false;
+            }
+
+            try {
+                initPlugin();
+            } catch (final IOException e) {
+                throw new RiakPluginException(e.getMessage(), e);
+            }
+        }
+
         if (r == null) {
             setOutputDone();
 
             return false;
-        }
-
-        if (first) {
-            first = false;
-
-            try {
-                initPlugin();
-            } catch (IOException e) {
-                throw new RiakPluginException(e.getMessage(), e);
-            }
         }
 
         try {
@@ -147,7 +152,6 @@ public class RiakPlugin extends BaseStep implements StepInterface
         }
 
         processor = factory.processorFor(this, data, meta);
-
     }
 
     @Override
@@ -156,7 +160,10 @@ public class RiakPlugin extends BaseStep implements StepInterface
         meta = (RiakPluginMeta) smi;
         data = (RiakPluginData) sdi;
 
-        processor.shutdown();
+        if (processor != null) {
+            processor.shutdown();
+        }
+
         super.dispose(smi, sdi);
     }
 }

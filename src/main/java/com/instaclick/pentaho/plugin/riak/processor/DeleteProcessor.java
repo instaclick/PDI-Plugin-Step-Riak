@@ -19,7 +19,7 @@ public class DeleteProcessor extends AbstractProcessor
         if ( ! hasRiakKey(r)) {
             return false;
         }
-        
+
         final Location location = getLocation(r);
         final DeleteValue dv    = new DeleteValue.Builder(location).build();
 

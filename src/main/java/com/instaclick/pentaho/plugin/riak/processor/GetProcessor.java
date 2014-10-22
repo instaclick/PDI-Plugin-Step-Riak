@@ -24,7 +24,7 @@ public class GetProcessor extends AbstractProcessor
         if (data.resolver == null) {
             throw new RiakPluginException("Conflict resolver step is not defined");
         }
-        
+
         final String stepName           = data.resolver;
         final List<RiakObject> siblings = response.getValues();
         final VClock vClock             = response.getVectorClock();
