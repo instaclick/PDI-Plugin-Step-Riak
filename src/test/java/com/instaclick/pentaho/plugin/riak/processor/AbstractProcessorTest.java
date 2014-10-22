@@ -1,10 +1,9 @@
 
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.raw.RawClient;
+import com.basho.riak.client.api.RiakClient;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
-import com.instaclick.pentaho.plugin.riak.RiakPluginException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -13,17 +12,18 @@ import org.pentaho.di.core.row.RowMetaInterface;
 
 public class AbstractProcessorTest
 {
-    RawClient client;
+    RiakClient client;
     RiakPlugin plugin;
     RiakPluginData data;
 
     @Before
     public void setUp()
     {
-        client      = mock(RawClient.class, RETURNS_MOCKS);
+        client      = mock(RiakClient.class, RETURNS_MOCKS);
         data        = mock(RiakPluginData.class);
         plugin      = mock(RiakPlugin.class);
         data.bucket = "test_bucket";
+        data.bucketType   = "test_type";
     }
 
     @Test
@@ -113,7 +113,7 @@ public class AbstractProcessorTest
 
     public class AbstractProcessorImpl extends AbstractProcessor
     {
-        public AbstractProcessorImpl(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
+        public AbstractProcessorImpl(final RiakClient client, final RiakPlugin plugin, final RiakPluginData data)
         {
             super(client, plugin, data);
         }

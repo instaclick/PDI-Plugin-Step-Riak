@@ -1,20 +1,32 @@
 package com.instaclick.pentaho.plugin.riak.processor;
 
-import com.basho.riak.client.raw.RawClient;
+import com.basho.riak.client.api.RiakClient;
+import com.basho.riak.client.core.query.Location;
+import com.basho.riak.client.core.query.Namespace;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 
 abstract class AbstractProcessor implements Processor
 {
     protected final RiakPluginData data;
+    protected final Namespace namespace;
     protected final RiakPlugin plugin;
-    protected final RawClient client;
+    protected final RiakClient client;
 
-    public AbstractProcessor(final RawClient client, final RiakPlugin plugin, final RiakPluginData data)
+    public AbstractProcessor(final RiakClient client, final RiakPlugin plugin, final RiakPluginData data)
     {
-        this.plugin = plugin;
-        this.client = client;
-        this.data   = data;
+        this.data       = data;
+        this.plugin     = plugin;
+        this.client     = client;
+        this.namespace  = new Namespace(data.bucketType, data.bucket);
+    }
+    
+    protected Location getLocation(final Object[] r) throws Exception
+    {
+        final String key        = getRiakKey(r);
+        final Location location = new Location(namespace, key);
+
+        return location;
     }
 
     protected String getRiakKey(final Object[] r) throws Exception

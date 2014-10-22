@@ -1,5 +1,6 @@
 package com.instaclick.pentaho.plugin.riak;
 
+import com.basho.riak.client.core.query.Namespace;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -14,6 +15,7 @@ import static com.instaclick.pentaho.plugin.riak.Messages.getString;
 import com.instaclick.pentaho.plugin.riak.processor.Processor;
 import com.instaclick.pentaho.plugin.riak.processor.ProcessorFactory;
 import java.io.IOException;
+import org.pentaho.di.core.Const;
 
 public class RiakPlugin extends BaseStep implements StepInterface
 {
@@ -76,6 +78,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         // use meta.getFields() to change it, so it reflects the output row structure
         meta.getFields(data.outputRowMeta, getStepname(), null, null, this);
 
+        final String bucketType         = environmentSubstitute(meta.getBucketType());
         final String resolver           = environmentSubstitute(meta.getResolver());
         final String bucket             = environmentSubstitute(meta.getBucket());
         final String vclock             = environmentSubstitute(meta.getVClock());
@@ -85,12 +88,13 @@ public class RiakPlugin extends BaseStep implements StepInterface
         final String key                = environmentSubstitute(meta.getKey());
         final RiakPluginData.Mode mode  = meta.getMode();
 
-        logMinimal(getString("RiakPlugin.Mode.Label")   + " : '" + mode   + "'");
-        logMinimal(getString("RiakPlugin.Host.Label")   + " : '" + host   + "'");
-        logMinimal(getString("RiakPlugin.Port.Label")   + " : '" + port   + "'");
-        logMinimal(getString("RiakPlugin.Bucket.Label") + " : '" + bucket + "'");
-        logMinimal(getString("RiakPlugin.Value.Label")  + " : '" + value  + "'");
-        logMinimal(getString("RiakPlugin.Key.Label")    + " : '" + key    + "'");
+        logMinimal(getString("RiakPlugin.Mode.Label")       + " : '" + mode   + "'");
+        logMinimal(getString("RiakPlugin.Host.Label")       + " : '" + host   + "'");
+        logMinimal(getString("RiakPlugin.Port.Label")       + " : '" + port   + "'");
+        logMinimal(getString("RiakPlugin.Bucket.Label")     + " : '" + bucket + "'");
+        logMinimal(getString("RiakPlugin.BucketType.Label") + " : '" + bucketType + "'");
+        logMinimal(getString("RiakPlugin.Value.Label")      + " : '" + value  + "'");
+        logMinimal(getString("RiakPlugin.Key.Label")        + " : '" + key    + "'");
 
         if (host == null) {
             throw new RiakPluginException("Invalid riak host name : " + host);
@@ -103,7 +107,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         if (bucket == null) {
             throw new RiakPluginException("Invalid bucket name : " + bucket);
         }
-
+       
         if (key == null) {
             throw new RiakPluginException("Invalid key field : " + key);
         }
@@ -116,11 +120,15 @@ public class RiakPlugin extends BaseStep implements StepInterface
         data.valueFieldIndex = data.outputRowMeta.indexOfValue(value);
         data.keyFieldIndex   = data.outputRowMeta.indexOfValue(key);
         data.port            = Integer.valueOf(port);
+        data.bucketType      = bucketType;
         data.resolver        = resolver;
         data.vclock          = vclock;
         data.bucket          = bucket;
         data.host            = host;
         data.mode            = mode;
+        data.bucketType      = Const.isEmpty(bucketType) 
+            ? Namespace.DEFAULT_BUCKET_TYPE
+            : bucketType;
 
         if (mode != RiakPluginData.Mode.DELETE && data.vclock != null) {
             data.vclockFieldIndex = data.outputRowMeta.indexOfValue(data.vclock);

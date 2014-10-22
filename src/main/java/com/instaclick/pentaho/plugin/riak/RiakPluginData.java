@@ -10,6 +10,7 @@ public class RiakPluginData extends BaseStepData implements StepDataInterface
     public Integer vclockFieldIndex;
     public Integer valueFieldIndex;
     public Integer keyFieldIndex;
+    public String bucketType;
     public String resolver;
     public String bucket;
     public String vclock;

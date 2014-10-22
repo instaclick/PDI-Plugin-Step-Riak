@@ -1,6 +1,7 @@
 
 package com.instaclick.pentaho.plugin.riak;
 
+import com.basho.riak.client.core.query.Namespace;
 import java.util.List;
 import java.util.Map;
 
@@ -33,16 +34,18 @@ import org.w3c.dom.Node;
 
 public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
 {
-    private static final String FIELD_HOST     = "host";
-    private static final String FIELD_PORT     = "port";
-    private static final String FIELD_BUCKET   = "bucket";
-    private static final String FIELD_RESOLVER = "resolver";
-    private static final String FIELD_VCLOCK   = "vclock";
-    private static final String FIELD_VALUE    = "value";
-    private static final String FIELD_KEY      = "key";
-    private static final String FIELD_MODE     = "mode";
+    private static final String FIELD_BUCKET_TYPE   = "bucket_type";
+    private static final String FIELD_HOST          = "host";
+    private static final String FIELD_PORT          = "port";
+    private static final String FIELD_BUCKET        = "bucket";
+    private static final String FIELD_RESOLVER      = "resolver";
+    private static final String FIELD_VCLOCK        = "vclock";
+    private static final String FIELD_VALUE         = "value";
+    private static final String FIELD_KEY           = "key";
+    private static final String FIELD_MODE          = "mode";
 
     private RiakPluginData.Mode mode = RiakPluginData.Mode.GET;
+    private String bucketType = Namespace.DEFAULT_BUCKET_TYPE;
     private String resolver;
     private String bucket;
     private String host;
@@ -112,6 +115,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     {
         final StringBuilder bufer = new StringBuilder();
 
+        bufer.append("   ").append(XMLHandler.addTagValue(FIELD_BUCKET_TYPE, getBucketType()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_MODE, getMode().toString()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_RESOLVER, getResolver()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_BUCKET, getBucket()));
@@ -128,6 +132,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleXMLException
     {
         try {
+            setBucketType(XMLHandler.getTagValue(stepnode, FIELD_BUCKET_TYPE));
             setResolver(XMLHandler.getTagValue(stepnode, FIELD_RESOLVER));
             setBucket(XMLHandler.getTagValue(stepnode, FIELD_BUCKET));
             setVClock(XMLHandler.getTagValue(stepnode, FIELD_VCLOCK));
@@ -146,6 +151,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void readRep(Repository rep, ObjectId idStep, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleException
     {
         try {
+            setBucketType(rep.getStepAttributeString(idStep, FIELD_BUCKET_TYPE));
             setResolver(rep.getStepAttributeString(idStep, FIELD_RESOLVER));
             setBucket(rep.getStepAttributeString(idStep, FIELD_BUCKET));
             setVClock(rep.getStepAttributeString(idStep, FIELD_VCLOCK));
@@ -166,6 +172,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void saveRep(Repository rep, ObjectId idTransformation, ObjectId idStep) throws KettleException
     {
         try {
+            rep.saveStepAttribute(idTransformation, idStep, FIELD_BUCKET_TYPE, getBucketType());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_MODE, getMode().toString());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_RESOLVER, getResolver());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_BUCKET, getBucket());
@@ -183,7 +190,8 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     @Override
     public void setDefault()
     {
-        this.mode = RiakPluginData.Mode.GET;
+        this.mode       = RiakPluginData.Mode.GET;
+        this.bucketType = Namespace.DEFAULT_BUCKET_TYPE; 
     }
 
     @Override
@@ -239,6 +247,20 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void setBucket(String bucket)
     {
         this.bucket = bucket;
+    }
+    
+    public String getBucketType()
+    {
+        return bucketType;
+    }
+
+    public void setBucketType(String type)
+    {
+        if (Const.isEmpty(type)) {
+            type = Namespace.DEFAULT_BUCKET_TYPE; 
+        }
+
+        this.bucketType = type;
     }
 
     public String getHost()

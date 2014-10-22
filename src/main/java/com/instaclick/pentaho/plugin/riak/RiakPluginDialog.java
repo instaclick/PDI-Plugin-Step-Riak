@@ -1,5 +1,6 @@
 package com.instaclick.pentaho.plugin.riak;
 
+import com.basho.riak.client.core.query.Namespace;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +53,11 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
     private Text textBucket;
     private FormData formBucketLabel;
     private FormData formBucketText;
+    
+    private Label labelBucketType;
+    private Text textBucketType;
+    private FormData formBucketTypeLabel;
+    private FormData formBucketTypeText;
 
     private Label labelValue;
     private Text textValue;
@@ -262,6 +268,30 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formBucketText.top    = new FormAttachment(textPort, margin);
 
         textBucket.setLayoutData(formBucketText);
+        
+        // BucketType line
+        labelBucketType = new Label(shell, SWT.RIGHT);
+        labelBucketType.setText(getString("RiakPlugin.BucketType.Label"));
+        props.setLook(labelBucketType);
+
+        formBucketTypeLabel       = new FormData();
+        formBucketTypeLabel.left  = new FormAttachment(0, 0);
+        formBucketTypeLabel.right = new FormAttachment(middle, -margin);
+        formBucketTypeLabel.top   = new FormAttachment(textBucket , margin);
+
+        labelBucketType.setLayoutData(formBucketTypeLabel);
+
+        textBucketType = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+
+        props.setLook(textBucketType);
+        textBucketType.addModifyListener(modifyListener);
+
+        formBucketTypeText        = new FormData();
+        formBucketTypeText.left   = new FormAttachment(middle, 0);
+        formBucketTypeText.right  = new FormAttachment(100, 0);
+        formBucketTypeText.top    = new FormAttachment(textBucket, margin);
+
+        textBucketType.setLayoutData(formBucketTypeText);
 
          // Body line
         labelValue = new Label(shell, SWT.RIGHT);
@@ -454,6 +484,10 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textBucket.setText(input.getBucket());
         }
 
+        if (input.getBucketType() != null) {
+            textBucketType.setText(input.getBucketType());
+        }
+
         if (input.getVClock() != null) {
             textVClock.setText(input.getVClock());
         }
@@ -503,6 +537,10 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textBucket.setFocus();
             return;
         }
+        
+        if (Const.isEmpty(textBucketType.getText())) {
+            textBucketType.setText(Namespace.DEFAULT_BUCKET_TYPE);
+        }
 
         if (Const.isEmpty(textKey.getText())) {
             textKey.setFocus();
@@ -516,6 +554,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         input.setPort(textPort.getText());
         input.setMode(comboMode.getText());
         input.setValue(textValue.getText());
+        input.setBucketType(textBucketType.getText());
         input.setKey(textKey.getText());
 
         dispose();
