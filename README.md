@@ -28,7 +28,8 @@ PDI Step Configuration
 | Mode                  | PUT,GET or DELETE                                                             |
 | Host                  | Riak Host                                                                     |
 | Port                  | Riak Port                                                                     |
-| Bucket                | Riak Bucket name                                                              |
+| Bucket Name           | Riak Bucket name                                                              |
+| Bucket Type           | Riak Bucket type                                                              |
 | Resolver              | Conflic resolver Step                                                         |
 | Key                   | Field that will be used as riak key                                           |
 | Value                 | Field that will be used as riak value                                         |
