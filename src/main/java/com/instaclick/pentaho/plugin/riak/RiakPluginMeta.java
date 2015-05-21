@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
 {
     private static final String FIELD_BUCKET_TYPE   = "bucket_type";
+    private static final String FIELD_CONTENT_TYPE  = "content_type";
     private static final String FIELD_HOST          = "host";
     private static final String FIELD_PORT          = "port";
     private static final String FIELD_BUCKET        = "bucket";
@@ -46,6 +47,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
 
     private RiakPluginData.Mode mode = RiakPluginData.Mode.GET;
     private String bucketType = Namespace.DEFAULT_BUCKET_TYPE;
+    private String contentType;
     private String resolver;
     private String bucket;
     private String host;
@@ -92,6 +94,12 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             valueField.setOrigin(name);
             inputRowMeta.addValueMeta(vclockField);
         }
+
+        if ( ! Const.isEmpty(contentType)) {
+            final ValueMetaInterface contentTypeField = new ValueMeta(contentType, ValueMeta.TYPE_STRING);
+            valueField.setOrigin(name);
+            inputRowMeta.addValueMeta(contentTypeField);
+        }
     }
 
     @Override
@@ -115,6 +123,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     {
         final StringBuilder bufer = new StringBuilder();
 
+        bufer.append("   ").append(XMLHandler.addTagValue(FIELD_CONTENT_TYPE, getContentType()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_BUCKET_TYPE, getBucketType()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_MODE, getMode().toString()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_RESOLVER, getResolver()));
@@ -132,6 +141,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleXMLException
     {
         try {
+            setContentType(XMLHandler.getTagValue(stepnode, FIELD_CONTENT_TYPE));
             setBucketType(XMLHandler.getTagValue(stepnode, FIELD_BUCKET_TYPE));
             setResolver(XMLHandler.getTagValue(stepnode, FIELD_RESOLVER));
             setBucket(XMLHandler.getTagValue(stepnode, FIELD_BUCKET));
@@ -151,6 +161,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void readRep(Repository rep, ObjectId idStep, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleException
     {
         try {
+            setContentType(rep.getStepAttributeString(idStep, FIELD_CONTENT_TYPE));
             setBucketType(rep.getStepAttributeString(idStep, FIELD_BUCKET_TYPE));
             setResolver(rep.getStepAttributeString(idStep, FIELD_RESOLVER));
             setBucket(rep.getStepAttributeString(idStep, FIELD_BUCKET));
@@ -172,6 +183,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void saveRep(Repository rep, ObjectId idTransformation, ObjectId idStep) throws KettleException
     {
         try {
+            rep.saveStepAttribute(idTransformation, idStep, FIELD_CONTENT_TYPE, getContentType());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_BUCKET_TYPE, getBucketType());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_MODE, getMode().toString());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_RESOLVER, getResolver());
@@ -261,6 +273,16 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         }
 
         this.bucketType = type;
+    }
+
+    public String getContentType()
+    {
+        return contentType;
+    }
+
+    public void setContentType(String type)
+    {
+        this.contentType = type;
     }
 
     public String getHost()

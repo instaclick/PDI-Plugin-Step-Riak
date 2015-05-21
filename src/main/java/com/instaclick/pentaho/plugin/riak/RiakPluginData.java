@@ -7,6 +7,7 @@ import org.pentaho.di.trans.step.StepDataInterface;
 public class RiakPluginData extends BaseStepData implements StepDataInterface
 {
     public RowMetaInterface outputRowMeta;
+    public Integer contentTypeFieldIndex;
     public Integer vclockFieldIndex;
     public Integer valueFieldIndex;
     public Integer keyFieldIndex;

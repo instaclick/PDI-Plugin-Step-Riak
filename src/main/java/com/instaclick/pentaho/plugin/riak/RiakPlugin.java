@@ -83,6 +83,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         // use meta.getFields() to change it, so it reflects the output row structure
         meta.getFields(data.outputRowMeta, getStepname(), null, null, this);
 
+        final String contentType        = environmentSubstitute(meta.getContentType());
         final String bucketType         = environmentSubstitute(meta.getBucketType());
         final String resolver           = environmentSubstitute(meta.getResolver());
         final String bucket             = environmentSubstitute(meta.getBucket());
@@ -135,11 +136,19 @@ public class RiakPlugin extends BaseStep implements StepInterface
             ? Namespace.DEFAULT_BUCKET_TYPE
             : bucketType;
 
-        if (mode != RiakPluginData.Mode.DELETE && data.vclock != null) {
+        if (mode != RiakPluginData.Mode.DELETE && ! Const.isEmpty(data.vclock)) {
             data.vclockFieldIndex = data.outputRowMeta.indexOfValue(data.vclock);
 
             if (data.vclockFieldIndex < 0) {
                 throw new RiakPluginException("Unable to retrieve vclock field : " + vclock);
+            }
+        }
+
+        if ( ! Const.isEmpty(contentType)) {
+            data.contentTypeFieldIndex = data.outputRowMeta.indexOfValue(contentType);
+
+            if (data.contentTypeFieldIndex < 0 && mode == RiakPluginData.Mode.PUT) {
+                throw new RiakPluginException("Unable to retrieve Content-Type field : " + contentType);
             }
         }
 

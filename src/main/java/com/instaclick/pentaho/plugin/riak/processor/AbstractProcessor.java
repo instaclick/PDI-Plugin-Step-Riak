@@ -60,6 +60,15 @@ abstract class AbstractProcessor implements Processor
         return null;
     }
 
+    protected String getRiakContentType(final Object[] r) throws Exception
+    {
+        if (hasRiakContentType(r)) {
+            return (r[data.contentTypeFieldIndex] == null) ? null : r[data.contentTypeFieldIndex].toString();
+        }
+
+        return null;
+    }
+
     protected boolean hasRiakVClock(final Object[] r) throws Exception
     {
         return rowContains(r, data.vclockFieldIndex);
@@ -73,6 +82,11 @@ abstract class AbstractProcessor implements Processor
     protected boolean hasRiakValue(final Object[] r) throws Exception
     {
         return rowContains(r, data.valueFieldIndex);
+    }
+
+    protected boolean hasRiakContentType(final Object[] r) throws Exception
+    {
+        return rowContains(r, data.contentTypeFieldIndex);
     }
 
     protected boolean rowContains(final Object[] r, final Integer index) throws Exception

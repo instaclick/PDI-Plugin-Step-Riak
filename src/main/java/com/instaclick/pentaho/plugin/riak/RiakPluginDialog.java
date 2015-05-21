@@ -79,6 +79,11 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
     private FormData formVClockLabel;
     private FormData formVClockText;
 
+    private Label labelContentType;
+    private Text textContentType;
+    private FormData formContentTypeLabel;
+    private FormData formContentTypeText;
+
     private static final List<String> modes = new ArrayList<String>(Arrays.asList(new String[] {
         RiakPluginData.Mode.DELETE.toString(),
         RiakPluginData.Mode.GET.toString(),
@@ -389,6 +394,30 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         textVClock.setLayoutData(formVClockText);
 
+        // ContentType line
+        labelContentType = new Label(shell, SWT.RIGHT);
+        labelContentType.setText(getString("RiakPlugin.ContentType.Label"));
+        props.setLook(labelContentType);
+
+        formContentTypeLabel       = new FormData();
+        formContentTypeLabel.left  = new FormAttachment(0, 0);
+        formContentTypeLabel.right = new FormAttachment(middle, -margin);
+        formContentTypeLabel.top   = new FormAttachment(textVClock , margin);
+
+        labelContentType.setLayoutData(formContentTypeLabel);
+
+        textContentType = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+
+        props.setLook(textContentType);
+        textContentType.addModifyListener(modifyListener);
+
+        formContentTypeText        = new FormData();
+        formContentTypeText.left   = new FormAttachment(middle, 0);
+        formContentTypeText.right  = new FormAttachment(100, 0);
+        formContentTypeText.top    = new FormAttachment(textVClock, margin);
+
+        textContentType.setLayoutData(formContentTypeText);
+
         // Some buttons
         wOK     = new Button(shell, SWT.PUSH);
         wCancel = new Button(shell, SWT.PUSH);
@@ -488,6 +517,10 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textBucketType.setText(input.getBucketType());
         }
 
+        if (input.getContentType() != null) {
+            textContentType.setText(input.getContentType());
+        }
+
         if (input.getVClock() != null) {
             textVClock.setText(input.getVClock());
         }
@@ -555,6 +588,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         input.setMode(comboMode.getText());
         input.setValue(textValue.getText());
         input.setBucketType(textBucketType.getText());
+        input.setContentType(textContentType.getText());
         input.setKey(textKey.getText());
 
         dispose();

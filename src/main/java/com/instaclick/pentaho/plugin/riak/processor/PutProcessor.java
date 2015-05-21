@@ -26,6 +26,7 @@ public class PutProcessor extends AbstractProcessor
         final Location location             = getLocation(r);
         final RiakObject object             = new RiakObject();
         final byte[] vclock                 = getRiakVClock(r);
+        final String contentType            = getRiakContentType(r);
         final StoreValue.Builder builder    = new StoreValue.Builder(object);
 
         object.setValue(BinaryValue.create(getRiakValue(r)));
@@ -33,6 +34,10 @@ public class PutProcessor extends AbstractProcessor
 
         if (vclock != null) {
             builder.withVectorClock(new BasicVClock(vclock));
+        }
+
+        if (contentType != null) {
+            object.setContentType(contentType);
         }
 
         client.execute(builder.build());

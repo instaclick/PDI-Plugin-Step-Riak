@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.instaclick</groupId>
     <artifactId>ic-riak-plugin</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>ic-riak-plugin</name>
     <properties>
@@ -11,11 +11,11 @@
         <project.plugin.zip>${project.build.directory}/plugin</project.plugin.zip>
         <project.plugin.deploy>${project.build.directory}/plugin/${project.name}</project.plugin.deploy>
         <project.plugin.deploylib>${project.build.directory}/plugin/${project.name}/lib</project.plugin.deploylib>
-        <kettle.version>4.1.4-SNAPSHOT</kettle.version>
+        <kettle.version>5.3.0.0-200</kettle.version>
         <guava.version>14.0.1</guava.version>
         <skipTests>false</skipTests>
         <pdiInstall>false</pdiInstall>
-        <pdiInstallDir>/Applications/pentaho/pdi/design-tools/data-integration/plugins/steps/ic-riak-plugin</pdiInstallDir>
+        <pdiInstallDir>./data-integration/plugins/steps/ic-riak-plugin</pdiInstallDir>
     </properties>
     <dependencies>
         <dependency>
@@ -36,26 +36,20 @@
             <version>${guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>pentaho.kettle</groupId>
+            <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-core</artifactId>
             <version>${kettle.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>pentaho.kettle</groupId>
+            <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-engine</artifactId>
             <version>${kettle.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>pentaho.kettle</groupId>
+            <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-ui-swt</artifactId>
-            <version>${kettle.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>pentaho.kettle</groupId>
-            <artifactId>kettle-db</artifactId>
             <version>${kettle.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -74,7 +68,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.6.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -84,16 +77,10 @@
         </dependency>
     </dependencies>
     <repositories>
-        <repository>
-            <id>repository.pentaho.org</id>
-            <name>repository.pentaho.org</name>
-            <url>http://repository.pentaho.org/artifactory/pentaho</url>
-        </repository>
-        <repository>
-            <id>thirdparty.repository.pentaho.org</id>
-            <name>thirdparty.pentaho.org</name>
-            <url>http://repository.pentaho.org/artifactory/third-party</url>
-        </repository>
+         <repository>
+            <id>pentaho-releases</id>
+            <url>http://repository.pentaho.org/artifactory/repo/</url>
+          </repository>
         <repository>
             <snapshots>
                 <enabled>false</enabled>
