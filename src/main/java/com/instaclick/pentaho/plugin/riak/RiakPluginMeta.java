@@ -4,10 +4,12 @@ package com.instaclick.pentaho.plugin.riak;
 import com.basho.riak.client.core.query.Namespace;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
+import org.pentaho.di.core.Counter;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
@@ -29,7 +31,6 @@ import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
 public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
@@ -113,7 +114,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore ims) throws KettleStepException
+    public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
     {
         if (RiakPluginData.Mode.GET != mode) {
             return;
@@ -146,7 +147,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void check(List<CheckResultInterface> remarks, TransMeta transmeta, StepMeta stepMeta, RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info, VariableSpace vs, Repository rpstr, IMetaStore ims)
+    public void check(List<CheckResultInterface> remarks, TransMeta transmeta, StepMeta stepMeta, RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info)
     {
         final CheckResult prevSizeCheck = (prev == null || prev.isEmpty())
             ? new CheckResult(CheckResult.TYPE_RESULT_WARNING, "Not receiving any fields from previous steps!", stepMeta)
@@ -191,7 +192,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void loadXML(Node stepnode, List<DatabaseMeta> databases, IMetaStore ims) throws KettleXMLException
+    public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleXMLException
     {
         try {
             setContentType(XMLHandler.getTagValue(stepnode, FIELD_CONTENT_TYPE));
@@ -225,7 +226,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void readRep(Repository rep, IMetaStore ims, ObjectId idStep, List<DatabaseMeta> databases) throws KettleException
+    public void readRep(Repository rep, ObjectId idStep, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleException
     {
         try {
             setContentType(rep.getStepAttributeString(idStep, FIELD_CONTENT_TYPE));
@@ -257,7 +258,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void saveRep(Repository rep, IMetaStore ims, ObjectId idTransformation, ObjectId idStep) throws KettleException
+    public void saveRep(Repository rep, ObjectId idTransformation, ObjectId idStep) throws KettleException
     {
         try {
             rep.saveStepAttribute(idTransformation, idStep, FIELD_CONTENT_TYPE, getContentType());

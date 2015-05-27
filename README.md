@@ -3,7 +3,7 @@ IC Riak Plugin
 
 [![Build Status](https://travis-ci.org/instaclick/PDI-Plugin-Step-Riak.svg?branch=master)](https://travis-ci.org/instaclick/PDI-Plugin-Step-Riak)
 
-## Compatible with PDI/Kettle 5.x and riak 2.x
+## Compatible with PDI/Kettle 4.x and riak 2.x
 
 Building
 --------
