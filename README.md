@@ -39,7 +39,7 @@ Connection URI Example
 ----------------------
 * riak.dev
 * riak.dev:8087
-* riak.dev:8087?minConnections=1&maxConnections=2&connectionTimeout=200&idleTimeoutInMillis=200&idleTimeout=500
+* riak.dev:8087?minConnections=1&maxConnections=2&connectionTimeout=200&idleTimeout=500
 
 
 ![Get Resolver](http://s28.postimg.org/r2970e2kt/riak_get_resolver.png)
