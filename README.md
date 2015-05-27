@@ -26,7 +26,7 @@ PDI Step Configuration
 | Property              | Description                                                                   |
 | ----------------------|:-----------------------------------------------------------------------------:|
 | Mode                  | PUT,GET or DELETE                                                             |
-| Connection URI        | Riak Connection URI <host>:<port>?[params]                                    |
+| Connection URI        | Riak Connection URI [host]:[port]?[params]                                    |
 | Bucket Name           | Riak Bucket name                                                              |
 | Bucket Type           | Riak Bucket type                                                              |
 | Resolver              | Conflic resolver Step                                                         |
