@@ -15,8 +15,7 @@ public class RiakPluginData extends BaseStepData implements StepDataInterface
     public String resolver;
     public String bucket;
     public String vclock;
-    public String host;
-    public Integer port;
+    public String uri;
     public Mode mode;
 
     public enum Mode

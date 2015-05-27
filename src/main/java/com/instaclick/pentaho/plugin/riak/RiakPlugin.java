@@ -88,26 +88,20 @@ public class RiakPlugin extends BaseStep implements StepInterface
         final String resolver           = environmentSubstitute(meta.getResolver());
         final String bucket             = environmentSubstitute(meta.getBucket());
         final String vclock             = environmentSubstitute(meta.getVClock());
-        final String host               = environmentSubstitute(meta.getHost());
-        final String port               = environmentSubstitute(meta.getPort());
+        final String uri                = environmentSubstitute(meta.getUri());
         final String value              = environmentSubstitute(meta.getValue());
         final String key                = environmentSubstitute(meta.getKey());
         final RiakPluginData.Mode mode  = meta.getMode();
 
         logMinimal(getString("RiakPlugin.Mode.Label")       + " : '" + mode   + "'");
-        logMinimal(getString("RiakPlugin.Host.Label")       + " : '" + host   + "'");
-        logMinimal(getString("RiakPlugin.Port.Label")       + " : '" + port   + "'");
+        logMinimal(getString("RiakPlugin.Uri.Label")        + " : '" + uri   + "'");
         logMinimal(getString("RiakPlugin.Bucket.Label")     + " : '" + bucket + "'");
         logMinimal(getString("RiakPlugin.BucketType.Label") + " : '" + bucketType + "'");
         logMinimal(getString("RiakPlugin.Value.Label")      + " : '" + value  + "'");
         logMinimal(getString("RiakPlugin.Key.Label")        + " : '" + key    + "'");
 
-        if (host == null) {
-            throw new RiakPluginException("Invalid riak host name : " + host);
-        }
-
-        if (port == null) {
-            throw new RiakPluginException("Invalid riak port : " + port);
+        if (uri == null) {
+            throw new RiakPluginException("Invalid riak uri : " + uri);
         }
 
         if (bucket == null) {
@@ -125,12 +119,11 @@ public class RiakPlugin extends BaseStep implements StepInterface
         // get field index
         data.valueFieldIndex = data.outputRowMeta.indexOfValue(value);
         data.keyFieldIndex   = data.outputRowMeta.indexOfValue(key);
-        data.port            = Integer.valueOf(port);
         data.bucketType      = bucketType;
         data.resolver        = resolver;
         data.vclock          = vclock;
         data.bucket          = bucket;
-        data.host            = host;
+        data.uri            = uri;
         data.mode            = mode;
         data.bucketType      = Const.isEmpty(bucketType) 
             ? Namespace.DEFAULT_BUCKET_TYPE

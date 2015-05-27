@@ -50,7 +50,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     private String contentType;
     private String resolver;
     private String bucket;
-    private String host;
+    private String uri;
     private String port;
     private String value;
     private String vclock;
@@ -130,7 +130,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_BUCKET, getBucket()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_VCLOCK, getVClock()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_VALUE, getValue()));
-        bufer.append("   ").append(XMLHandler.addTagValue(FIELD_HOST, getHost()));
+        bufer.append("   ").append(XMLHandler.addTagValue(FIELD_HOST, getUri()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_PORT, getPort()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_KEY, getKey()));
 
@@ -148,7 +148,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             setVClock(XMLHandler.getTagValue(stepnode, FIELD_VCLOCK));
             setValue(XMLHandler.getTagValue(stepnode, FIELD_VALUE));
             setMode(XMLHandler.getTagValue(stepnode, FIELD_MODE));
-            setHost(XMLHandler.getTagValue(stepnode, FIELD_HOST));
+            setUri(XMLHandler.getTagValue(stepnode, FIELD_HOST));
             setPort(XMLHandler.getTagValue(stepnode, FIELD_PORT));
             setKey(XMLHandler.getTagValue(stepnode, FIELD_KEY));
 
@@ -168,7 +168,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             setVClock(rep.getStepAttributeString(idStep, FIELD_VCLOCK));
             setValue(rep.getStepAttributeString(idStep, FIELD_VALUE));
             setMode(rep.getStepAttributeString(idStep, FIELD_MODE));
-            setHost(rep.getStepAttributeString(idStep, FIELD_HOST));
+            setUri(rep.getStepAttributeString(idStep, FIELD_HOST));
             setPort(rep.getStepAttributeString(idStep, FIELD_PORT));
             setKey(rep.getStepAttributeString(idStep, FIELD_KEY));
 
@@ -190,7 +190,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             rep.saveStepAttribute(idTransformation, idStep, FIELD_BUCKET, getBucket());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_VCLOCK, getVClock());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_VALUE, getValue());
-            rep.saveStepAttribute(idTransformation, idStep, FIELD_HOST, getHost());
+            rep.saveStepAttribute(idTransformation, idStep, FIELD_HOST, getUri());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_PORT, getPort());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_KEY, getKey());
 
@@ -285,14 +285,14 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         this.contentType = type;
     }
 
-    public String getHost()
+    public String getUri()
     {
-        return host;
+        return uri;
     }
 
-    public void setHost(String host)
+    public void setUri(String uri)
     {
-        this.host = host;
+        this.uri = uri;
     }
 
     public String getPort()

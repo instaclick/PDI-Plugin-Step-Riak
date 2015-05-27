@@ -34,15 +34,10 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 {
     private RiakPluginMeta input;
 
-    private Label labelHost;
-    private Text textHost;
-    private FormData formHostLabel;
-    private FormData formHostText;
-
-    private Label labelPort;
-    private Text textPort;
-    private FormData formPortLabel;
-    private FormData formPortText;
+    private Label labelUri;
+    private Text textUri;
+    private FormData formUriLabel;
+    private FormData formUriText;
 
     private Label    labelMode;
     private CCombo   comboMode;
@@ -203,52 +198,28 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         comboMode.setLayoutData(formModeCombo);
 
         // Host line
-        labelHost = new Label(shell, SWT.RIGHT);
-        labelHost.setText(getString("RiakPlugin.Host.Label"));
-        props.setLook(labelHost);
+        labelUri = new Label(shell, SWT.RIGHT);
+        labelUri.setText(getString("RiakPlugin.Uri.Label"));
+        props.setLook(labelUri);
 
-        formHostLabel       = new FormData();
-        formHostLabel.left  = new FormAttachment(0, 0);
-        formHostLabel.right = new FormAttachment(middle, -margin);
-        formHostLabel.top   = new FormAttachment(comboMode , margin);
+        formUriLabel       = new FormData();
+        formUriLabel.left  = new FormAttachment(0, 0);
+        formUriLabel.right = new FormAttachment(middle, -margin);
+        formUriLabel.top   = new FormAttachment(comboMode , margin);
 
-        labelHost.setLayoutData(formHostLabel);
+        labelUri.setLayoutData(formUriLabel);
 
-        textHost = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textUri = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
-        props.setLook(textHost);
-        textHost.addModifyListener(modifyListener);
+        props.setLook(textUri);
+        textUri.addModifyListener(modifyListener);
 
-        formHostText        = new FormData();
-        formHostText.left   = new FormAttachment(middle, 0);
-        formHostText.right  = new FormAttachment(100, 0);
-        formHostText.top    = new FormAttachment(comboMode, margin);
+        formUriText        = new FormData();
+        formUriText.left   = new FormAttachment(middle, 0);
+        formUriText.right  = new FormAttachment(100, 0);
+        formUriText.top    = new FormAttachment(comboMode, margin);
 
-        textHost.setLayoutData(formHostText);
-
-        // Port line
-        labelPort = new Label(shell, SWT.RIGHT);
-        labelPort.setText(getString("RiakPlugin.Port.Label"));
-        props.setLook(labelPort);
-
-        formPortLabel       = new FormData();
-        formPortLabel.left  = new FormAttachment(0, 0);
-        formPortLabel.right = new FormAttachment(middle, -margin);
-        formPortLabel.top   = new FormAttachment(textHost , margin);
-
-        labelPort.setLayoutData(formPortLabel);
-
-        textPort = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-
-        props.setLook(textPort);
-        textPort.addModifyListener(modifyListener);
-
-        formPortText        = new FormData();
-        formPortText.left   = new FormAttachment(middle, 0);
-        formPortText.right  = new FormAttachment(100, 0);
-        formPortText.top    = new FormAttachment(textHost, margin);
-
-        textPort.setLayoutData(formPortText);
+        textUri.setLayoutData(formUriText);
 
         // Bucket line
         labelBucket = new Label(shell, SWT.RIGHT);
@@ -258,7 +229,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formBucketLabel       = new FormData();
         formBucketLabel.left  = new FormAttachment(0, 0);
         formBucketLabel.right = new FormAttachment(middle, -margin);
-        formBucketLabel.top   = new FormAttachment(textPort , margin);
+        formBucketLabel.top   = new FormAttachment(textUri , margin);
 
         labelBucket.setLayoutData(formBucketLabel);
 
@@ -270,7 +241,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formBucketText        = new FormData();
         formBucketText.left   = new FormAttachment(middle, 0);
         formBucketText.right  = new FormAttachment(100, 0);
-        formBucketText.top    = new FormAttachment(textPort, margin);
+        formBucketText.top    = new FormAttachment(textUri, margin);
 
         textBucket.setLayoutData(formBucketText);
         
@@ -454,7 +425,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         textValue.addSelectionListener(lsDef);
         wStepname.addSelectionListener(lsDef);
-        textHost.addSelectionListener(lsDef);
+        textUri.addSelectionListener(lsDef);
 
         // Detect X or ALT-F4 or something that kills this window...
         shell.addShellListener(new ShellAdapter() {
@@ -525,12 +496,8 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textVClock.setText(input.getVClock());
         }
 
-        if (input.getHost() != null) {
-            textHost.setText(input.getHost());
-        }
-
-        if (input.getPort() != null) {
-            textPort.setText(input.getPort());
+        if (input.getUri() != null) {
+            textUri.setText(input.getUri());
         }
 
         if (input.getValue() != null) {
@@ -556,13 +523,8 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
     {
         stepname = wStepname.getText();
 
-        if (Const.isEmpty(textHost.getText())) {
-            textHost.setFocus();
-            return;
-        }
-
-        if (Const.isEmpty(textPort.getText())) {
-            textPort.setFocus();
+        if (Const.isEmpty(textUri.getText())) {
+            textUri.setFocus();
             return;
         }
 
@@ -583,8 +545,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         input.setResolver(textResolver.getText());
         input.setBucket(textBucket.getText());
         input.setVClock(textVClock.getText());
-        input.setHost(textHost.getText());
-        input.setPort(textPort.getText());
+        input.setUri(textUri.getText());
         input.setMode(comboMode.getText());
         input.setValue(textValue.getText());
         input.setBucketType(textBucketType.getText());

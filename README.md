@@ -26,13 +26,20 @@ PDI Step Configuration
 | Property              | Description                                                                   |
 | ----------------------|:-----------------------------------------------------------------------------:|
 | Mode                  | PUT,GET or DELETE                                                             |
-| Host                  | Riak Host                                                                     |
-| Port                  | Riak Port                                                                     |
+| Connection URI        | Riak Connection URI <host>:<port>?[params]                                    |
 | Bucket Name           | Riak Bucket name                                                              |
 | Bucket Type           | Riak Bucket type                                                              |
 | Resolver              | Conflic resolver Step                                                         |
 | Key                   | Field that will be used as riak key                                           |
 | Value                 | Field that will be used as riak value                                         |
 | VClock                | Field that will be used as riak vclock                                        |
+
+
+Connection URI Example
+----------------------
+* riak.dev
+* riak.dev:8087
+* riak.dev:8087?minConnections=1&maxConnections=2&connectionTimeout=200&idleTimeoutInMillis=200&idleTimeout=500
+
 
 ![Get Resolver](http://s28.postimg.org/r2970e2kt/riak_get_resolver.png)
