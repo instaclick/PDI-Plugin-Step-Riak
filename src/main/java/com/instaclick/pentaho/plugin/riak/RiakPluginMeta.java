@@ -2,6 +2,7 @@
 package com.instaclick.pentaho.plugin.riak;
 
 import com.basho.riak.client.core.query.Namespace;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
 public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
@@ -45,6 +47,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     private static final String FIELD_KEY           = "key";
     private static final String FIELD_MODE          = "mode";
 
+    private final List<SecondaryIndex> secondaryIndexes = new ArrayList<SecondaryIndex>();
     private RiakPluginData.Mode mode = RiakPluginData.Mode.GET;
     private String bucketType = Namespace.DEFAULT_BUCKET_TYPE;
     private String contentType;
@@ -55,6 +58,35 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     private String value;
     private String vclock;
     private String key;
+
+    public static class SecondaryIndex
+    {
+        private final String index;
+        private final String field;
+        private final String type;
+
+        SecondaryIndex(final String index, final String field, final String type)
+        {
+            this.index = index;
+            this.field = field;
+            this.type  = type;
+        }
+
+        public String getIndex()
+        {
+            return index;
+        }
+
+        public String getField()
+        {
+            return field;
+        }
+
+        public String getType()
+        {
+            return type;
+        }
+    }
 
     public RiakPluginMeta() {
         super();
@@ -78,7 +110,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
+    public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore ims) throws KettleStepException
     {
         if (RiakPluginData.Mode.GET != mode) {
             return;
@@ -103,7 +135,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void check(List<CheckResultInterface> remarks, TransMeta transmeta, StepMeta stepMeta, RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info)
+    public void check(List<CheckResultInterface> remarks, TransMeta transmeta, StepMeta stepMeta, RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info, VariableSpace vs, Repository rpstr, IMetaStore ims)
     {
         final CheckResult prevSizeCheck = (prev == null || prev.isEmpty())
             ? new CheckResult(CheckResult.TYPE_RESULT_WARNING, "Not receiving any fields from previous steps!", stepMeta)
@@ -138,7 +170,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleXMLException
+    public void loadXML(Node stepnode, List<DatabaseMeta> databases, IMetaStore ims) throws KettleXMLException
     {
         try {
             setContentType(XMLHandler.getTagValue(stepnode, FIELD_CONTENT_TYPE));
@@ -158,7 +190,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void readRep(Repository rep, ObjectId idStep, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleException
+    public void readRep(Repository rep, IMetaStore ims, ObjectId idStep, List<DatabaseMeta> databases) throws KettleException
     {
         try {
             setContentType(rep.getStepAttributeString(idStep, FIELD_CONTENT_TYPE));
@@ -180,7 +212,7 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     }
 
     @Override
-    public void saveRep(Repository rep, ObjectId idTransformation, ObjectId idStep) throws KettleException
+    public void saveRep(Repository rep, IMetaStore ims, ObjectId idTransformation, ObjectId idStep) throws KettleException
     {
         try {
             rep.saveStepAttribute(idTransformation, idStep, FIELD_CONTENT_TYPE, getContentType());
@@ -323,5 +355,20 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
     public void setKey(String key)
     {
         this.key = key;
+    }
+
+    public void addSecondaryIndex(final String index, final String field, final String type)
+    {
+        this.secondaryIndexes.add(new SecondaryIndex(index, field, type));
+    }
+
+    public List<SecondaryIndex> getSecondaryIndexes()
+    {
+        return this.secondaryIndexes;
+    }
+
+    public void clearSecondaryIndex()
+    {
+        this.secondaryIndexes.clear();
     }
 }

@@ -57,6 +57,11 @@ public class RiakPlugin extends BaseStep implements StepInterface
             return false;
         }
 
+        // log progress
+        if (checkFeedback(getLinesWritten())) {
+            logBasic(String.format("liner %s", getLinesWritten()));
+        }
+
         try {
             return processor.process(r);
         } catch (Exception ex) {
@@ -81,7 +86,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         // clone the input row structure and place it in our data object
         data.outputRowMeta = (RowMetaInterface) getInputRowMeta().clone();
         // use meta.getFields() to change it, so it reflects the output row structure
-        meta.getFields(data.outputRowMeta, getStepname(), null, null, this);
+        meta.getFields(data.outputRowMeta, getStepname(), null, null, this, repository, metaStore);
 
         final String contentType        = environmentSubstitute(meta.getContentType());
         final String bucketType         = environmentSubstitute(meta.getBucketType());

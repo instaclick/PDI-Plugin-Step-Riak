@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class ProcessorFactory
     private Map<String, String> parseUriParameters(final String query)
     {
         if (query == null || "".equals(query)) {
-            return Collections.EMPTY_MAP;
+            return new HashMap<String, String>(0);
         }
 
         return Splitter.on("&")

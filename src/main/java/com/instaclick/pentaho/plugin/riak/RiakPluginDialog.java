@@ -29,10 +29,24 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import static com.instaclick.pentaho.plugin.riak.Messages.getString;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TableItem;
+import org.pentaho.di.core.Props;
+import org.pentaho.di.ui.core.widget.ColumnInfo;
+import org.pentaho.di.ui.core.widget.TableView;
 
 public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterface
 {
     private RiakPluginMeta input;
+
+    private CTabFolder wTabFolder;
+    private FormData fdTabFolder;
+
+    private CTabItem wConnectionTab, wSecondaryIndex;
+
+    private FormData fdConnectionComp, fdSecondaryIndex;
 
     private Label labelUri;
     private Text textUri;
@@ -48,7 +62,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
     private Text textBucket;
     private FormData formBucketLabel;
     private FormData formBucketText;
-    
+
     private Label labelBucketType;
     private Text textBucketType;
     private FormData formBucketTypeLabel;
@@ -79,10 +93,19 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
     private FormData formContentTypeLabel;
     private FormData formContentTypeText;
 
+    private Label labelSecondaryIndex;
+    private TableView tableSecondaryIndex;
+    private FormData formSecondaryIndexLabel;
+    private FormData formSecondaryIndexText;
+
     private static final List<String> modes = new ArrayList<String>(Arrays.asList(new String[] {
         RiakPluginData.Mode.DELETE.toString(),
         RiakPluginData.Mode.GET.toString(),
         RiakPluginData.Mode.PUT.toString(),
+    }));
+
+    private static final List<String> secondaryIndexTypes = new ArrayList<String>(Arrays.asList(new String[] {
+        "int", "bin"
     }));
 
     private final ModifyListener modifyListener = new ModifyListener() {
@@ -170,19 +193,38 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         wStepname.setLayoutData(fdStepname);
 
+        wTabFolder = new CTabFolder(shell, SWT.BORDER);
+        props.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);
+        wTabFolder.setSimple(false);
+
+        // ///////////////////////////////////////////////////////////
+        // / START OF Connection TAB
+        // ///////////////////////////////////////////////////////////
+        wConnectionTab = new CTabItem(wTabFolder, SWT.NONE);
+        wConnectionTab.setText(getString("RiakPlugin.ConnectionTab.TabTitle"));
+
+        Composite wConnectionComp = new Composite(wTabFolder, SWT.NONE);
+        props.setLook(wConnectionComp);
+
+        FormLayout connectionLayout   = new FormLayout();
+        connectionLayout.marginWidth  = 3;
+        connectionLayout.marginHeight = 3;
+
+        wConnectionComp.setLayout( connectionLayout );
+
         // Mode
-        labelMode = new Label(shell, SWT.RIGHT);
+        labelMode = new Label(wConnectionComp, SWT.RIGHT);
         labelMode.setText(getString("RiakPlugin.Mode.Label"));
         props.setLook(labelMode);
 
         formModeLabel       = new FormData();
         formModeLabel.left  = new FormAttachment(0, 0);
-        formModeLabel.top   = new FormAttachment(wStepname, margin);
+        formModeLabel.top   = new FormAttachment(0, margin);
         formModeLabel.right = new FormAttachment(middle, 0);
 
         labelMode.setLayoutData(formModeLabel);
 
-        comboMode = new CCombo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
+        comboMode = new CCombo(wConnectionComp, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
 
         comboMode.setToolTipText(getString("RiakPlugin.Mode.Label"));
         comboMode.addSelectionListener(comboModeListener);
@@ -192,13 +234,13 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         formModeCombo      = new FormData();
         formModeCombo.left = new FormAttachment(middle, margin);
-        formModeCombo.top  = new FormAttachment(wStepname, margin);
+        formModeCombo.top  = new FormAttachment(0, margin);
         formModeCombo.right= new FormAttachment(100, 0);
 
         comboMode.setLayoutData(formModeCombo);
 
         // Host line
-        labelUri = new Label(shell, SWT.RIGHT);
+        labelUri = new Label(wConnectionComp, SWT.RIGHT);
         labelUri.setText(getString("RiakPlugin.Uri.Label"));
         props.setLook(labelUri);
 
@@ -209,7 +251,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelUri.setLayoutData(formUriLabel);
 
-        textUri = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textUri = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textUri);
         textUri.addModifyListener(modifyListener);
@@ -222,7 +264,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         textUri.setLayoutData(formUriText);
 
         // Bucket line
-        labelBucket = new Label(shell, SWT.RIGHT);
+        labelBucket = new Label(wConnectionComp, SWT.RIGHT);
         labelBucket.setText(getString("RiakPlugin.Bucket.Label"));
         props.setLook(labelBucket);
 
@@ -233,7 +275,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelBucket.setLayoutData(formBucketLabel);
 
-        textBucket = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textBucket = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textBucket);
         textBucket.addModifyListener(modifyListener);
@@ -244,9 +286,9 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formBucketText.top    = new FormAttachment(textUri, margin);
 
         textBucket.setLayoutData(formBucketText);
-        
+
         // BucketType line
-        labelBucketType = new Label(shell, SWT.RIGHT);
+        labelBucketType = new Label(wConnectionComp, SWT.RIGHT);
         labelBucketType.setText(getString("RiakPlugin.BucketType.Label"));
         props.setLook(labelBucketType);
 
@@ -257,7 +299,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelBucketType.setLayoutData(formBucketTypeLabel);
 
-        textBucketType = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textBucketType = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textBucketType);
         textBucketType.addModifyListener(modifyListener);
@@ -270,7 +312,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         textBucketType.setLayoutData(formBucketTypeText);
 
          // Body line
-        labelValue = new Label(shell, SWT.RIGHT);
+        labelValue = new Label(wConnectionComp, SWT.RIGHT);
         labelValue.setText(getString("RiakPlugin.Value.Label"));
         props.setLook(labelValue);
 
@@ -281,7 +323,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelValue.setLayoutData(formValueLabel);
 
-        textValue = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textValue = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textValue);
         textValue.addModifyListener(modifyListener);
@@ -294,7 +336,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         textValue.setLayoutData(formValueText);
 
         // Key line
-        labelKey = new Label(shell, SWT.RIGHT);
+        labelKey = new Label(wConnectionComp, SWT.RIGHT);
         labelKey.setText(getString("RiakPlugin.Key.Label"));
         props.setLook(labelKey);
 
@@ -305,7 +347,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelKey.setLayoutData(formKeyLabel);
 
-        textKey = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textKey = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textKey);
         textKey.addModifyListener(modifyListener);
@@ -318,7 +360,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         textKey.setLayoutData(formKeyText);
 
         // Resolver line
-        labelResolver = new Label(shell, SWT.RIGHT);
+        labelResolver = new Label(wConnectionComp, SWT.RIGHT);
         labelResolver.setText(getString("RiakPlugin.Resolver.Label"));
         props.setLook(labelResolver);
 
@@ -329,7 +371,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelResolver.setLayoutData(formResolverLabel);
 
-        textResolver = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textResolver = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textResolver);
         textResolver.addModifyListener(modifyListener);
@@ -342,7 +384,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         textResolver.setLayoutData(formResolverText);
 
         // VClock line
-        labelVClock = new Label(shell, SWT.RIGHT);
+        labelVClock = new Label(wConnectionComp, SWT.RIGHT);
         labelVClock.setText(getString("RiakPlugin.VClock.Label"));
         props.setLook(labelVClock);
 
@@ -353,7 +395,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelVClock.setLayoutData(formVClockLabel);
 
-        textVClock = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textVClock = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textVClock);
         textVClock.addModifyListener(modifyListener);
@@ -366,7 +408,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         textVClock.setLayoutData(formVClockText);
 
         // ContentType line
-        labelContentType = new Label(shell, SWT.RIGHT);
+        labelContentType = new Label(wConnectionComp, SWT.RIGHT);
         labelContentType.setText(getString("RiakPlugin.ContentType.Label"));
         props.setLook(labelContentType);
 
@@ -377,7 +419,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         labelContentType.setLayoutData(formContentTypeLabel);
 
-        textContentType = new Text(shell, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+        textContentType = new Text(wConnectionComp, SWT.MULTI | SWT.LEFT | SWT.BORDER);
 
         props.setLook(textContentType);
         textContentType.addModifyListener(modifyListener);
@@ -388,6 +430,95 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         formContentTypeText.top    = new FormAttachment(textVClock, margin);
 
         textContentType.setLayoutData(formContentTypeText);
+
+        fdConnectionComp        = new FormData();
+        fdConnectionComp.left   = new FormAttachment(0, 0);
+        fdConnectionComp.top    = new FormAttachment(0, 0);
+        fdConnectionComp.right  = new FormAttachment(100, 0);
+        fdConnectionComp.bottom = new FormAttachment(100, 0);
+
+        wConnectionComp.setLayoutData( fdConnectionComp);
+
+        wConnectionComp.layout();
+        wConnectionTab.setControl( wConnectionComp );
+
+        // ///////////////////////////////////////////////////////////
+        // / END OF Connection TAB
+        // ///////////////////////////////////////////////////////////
+
+
+        // ///////////////////////////////////////////////////////////
+        // / START OF Secontary Index
+        // ///////////////////////////////////////////////////////////
+        wSecondaryIndex = new CTabItem( wTabFolder, SWT.NONE );
+
+        wSecondaryIndex.setText(getString("RiakPlugin.SecondaryIndex.TabTitle"));
+
+        Composite wSecondaryIndexComp = new Composite( wTabFolder, SWT.NONE);
+        props.setLook( wSecondaryIndexComp );
+
+        FormLayout declareLayout    = new FormLayout();
+        declareLayout.marginWidth   = 3;
+        declareLayout.marginHeight  = 3;
+
+        wSecondaryIndexComp.setLayout( declareLayout );
+
+        // Bindings
+        labelSecondaryIndex = new Label(wSecondaryIndexComp, SWT.NONE);
+
+        labelSecondaryIndex.setText(getString("RiakPlugin.SecondaryIndex.Label"));
+        props.setLook(labelSecondaryIndex);
+
+        formSecondaryIndexLabel      = new FormData();
+        formSecondaryIndexLabel.left = new FormAttachment(0, 0);
+        formSecondaryIndexLabel.top  = new FormAttachment(0, margin);
+
+        labelSecondaryIndex.setLayoutData(formSecondaryIndexLabel);
+
+        ColumnInfo[] colinf  = new ColumnInfo[]{
+            new ColumnInfo(getString("RiakPlugin.SecondaryIndex.Column.Index"), ColumnInfo.COLUMN_TYPE_TEXT, false),
+            new ColumnInfo(getString("RiakPlugin.SecondaryIndex.Column.Field"), ColumnInfo.COLUMN_TYPE_TEXT, false),
+            new ColumnInfo(getString("RiakPlugin.SecondaryIndex.Column.Type"), ColumnInfo.COLUMN_TYPE_CCOMBO, secondaryIndexTypes.toArray(new String[secondaryIndexTypes.size()]), true),
+        };
+
+        // colinf[0].setUsingVariables(true);
+        // colinf[1].setUsingVariables(true);
+        // colinf[2].setUsingVariables(true);
+
+        tableSecondaryIndex = new TableView(transMeta, wSecondaryIndexComp, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL,
+            colinf,
+            input.getSecondaryIndexes().size(),
+            modifyListener,
+            props
+        );
+
+        formSecondaryIndexText        = new FormData();
+        formSecondaryIndexText.left   = new FormAttachment(0, 0);
+        formSecondaryIndexText.top    = new FormAttachment(labelSecondaryIndex, margin);
+        formSecondaryIndexText.right  = new FormAttachment(100, 0);
+        formSecondaryIndexText.bottom = new FormAttachment(100, -50);
+
+        tableSecondaryIndex.setLayoutData(formSecondaryIndexText);
+
+        fdSecondaryIndex        = new FormData();
+        fdSecondaryIndex.left   = new FormAttachment(0, 0);
+        fdSecondaryIndex.top    = new FormAttachment(0, 0);
+        fdSecondaryIndex.right  = new FormAttachment(100, 0);
+        fdSecondaryIndex.bottom = new FormAttachment(100, 0);
+
+        wSecondaryIndexComp.setLayoutData(fdSecondaryIndex);
+        wSecondaryIndexComp.layout();
+
+        wSecondaryIndex.setControl(wSecondaryIndexComp);
+
+        /// place TabFolder element
+        fdTabFolder         = new FormData();
+        fdTabFolder.left    = new FormAttachment(0, 0);
+        fdTabFolder.top     = new FormAttachment(wStepname, margin);
+        fdTabFolder.right   = new FormAttachment(100, 0);
+        fdTabFolder.bottom  = new FormAttachment(100, -50);
+
+        wTabFolder.setLayoutData(fdTabFolder);
 
         // Some buttons
         wOK     = new Button(shell, SWT.PUSH);
@@ -437,8 +568,9 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
 
         // Set the shell size, based upon previous time...
         setSize();
-
         getData();
+
+        wTabFolder.setSelection(0);
         input.setChanged(changed);
 
         shell.open();
@@ -508,6 +640,30 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textKey.setText(input.getKey());
         }
 
+        for (int i = 0; i < input.getSecondaryIndexes().size(); i++) {
+            final RiakPluginMeta.SecondaryIndex element = input.getSecondaryIndexes().get(i);
+            final TableItem item = tableSecondaryIndex.table.getItem(i);
+
+            final String indexName = element.getIndex();
+            final String fieldName = element.getField();
+            final String indexType = element.getType();
+
+            if ( ! Const.isEmpty(indexName)) {
+                item.setText(1, indexName);
+            }
+
+            if ( ! Const.isEmpty(fieldName)) {
+                item.setText(2, fieldName);
+            }
+
+            if ( ! Const.isEmpty(indexType)) {
+                item.setText(3, indexType);
+            }
+        }
+
+        tableSecondaryIndex.setRowNums();
+        tableSecondaryIndex.optWidth(true);
+
         wStepname.selectAll();
     }
 
@@ -532,7 +688,7 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
             textBucket.setFocus();
             return;
         }
-        
+
         if (Const.isEmpty(textBucketType.getText())) {
             textBucketType.setText(Namespace.DEFAULT_BUCKET_TYPE);
         }
@@ -551,6 +707,34 @@ public class RiakPluginDialog extends BaseStepDialog implements StepDialogInterf
         input.setBucketType(textBucketType.getText());
         input.setContentType(textContentType.getText());
         input.setKey(textKey.getText());
+        input.clearSecondaryIndex();
+
+        int count = tableSecondaryIndex.nrNonEmpty();
+
+        // nothing to save
+        if (count <= 0) {
+            dispose();
+
+            return;
+        }
+
+        for (int i = 0; i< count; i++) {
+            final TableItem item = tableSecondaryIndex.getNonEmpty(i);
+
+            if (item == null) {
+                continue;
+            }
+
+            final String indexName = item.getText(1);
+            final String fieldName = item.getText(2);
+            final String indexType = item.getText(3);
+
+            if (Const.isEmpty(indexName)) {
+                continue;
+            }
+
+            input.addSecondaryIndex(indexName, fieldName, indexType);
+        }
 
         dispose();
     }
