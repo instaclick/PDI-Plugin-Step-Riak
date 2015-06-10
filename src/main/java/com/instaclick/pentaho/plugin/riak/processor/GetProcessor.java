@@ -5,6 +5,8 @@ import com.basho.riak.client.api.cap.VClock;
 import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.core.query.Location;
 import com.basho.riak.client.core.query.RiakObject;
+import com.basho.riak.client.core.query.indexes.LongIntIndex;
+import com.basho.riak.client.core.query.indexes.StringBinIndex;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 import com.instaclick.pentaho.plugin.riak.RiakPluginException;
@@ -69,6 +71,25 @@ public class GetProcessor extends AbstractProcessor
 
         if (data.contentTypeFieldIndex != null && object.getContentType() != null) {
             r = RowDataUtil.addValueData(r, data.contentTypeFieldIndex, object.getContentType());
+        }
+
+        for (final RiakPluginData.Index item : data.indexes) {
+
+            if ("int".endsWith(item.type)) {
+                final LongIntIndex index = object.getIndexes().getIndex(LongIntIndex.named(item.index));
+
+                for (final Long value : index.values()) {
+                    r = RowDataUtil.addValueData(r, item.field, value);
+                }
+
+                continue;
+            }
+
+            final StringBinIndex index = object.getIndexes().getIndex(StringBinIndex.named(item.index));
+
+            for (final String value : index.values()) {
+                r = RowDataUtil.addValueData(r, item.field, value);
+            }
         }
 
         return r;

@@ -11,8 +11,7 @@ import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
 import com.instaclick.pentaho.plugin.riak.RiakPluginException;
 import com.instaclick.pentaho.plugin.riak.Whitebox;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -72,6 +71,7 @@ public class GetProcessorTest
         final List<RiakObject> values = Lists.newArrayList(sibling1, sibling2);
         final GetProcessor processor  = new GetProcessor(client, plugin, data);
 
+        data.indexes          = new ArrayList<RiakPluginData.Index>();
         data.resolver        = "test_resolver";
         data.outputRowMeta   = meta;
         data.valueFieldIndex = 1;
@@ -107,6 +107,7 @@ public class GetProcessorTest
 
         final GetProcessor processor  = new GetProcessor(client, plugin, data);
 
+        data.indexes          = new ArrayList<RiakPluginData.Index>();
         data.resolver      = "undefined-resolver";
         data.outputRowMeta = meta;
 
@@ -139,6 +140,7 @@ public class GetProcessorTest
         final RowMetaInterface meta   = mock(RowMetaInterface.class);
         final GetProcessor processor  = new GetProcessor(client, plugin, data);
 
+        data.indexes          = new ArrayList<RiakPluginData.Index>();
         data.resolver        = "resolver-foo";
         data.outputRowMeta   = meta;
         data.valueFieldIndex = 1;
@@ -167,6 +169,7 @@ public class GetProcessorTest
         final BinaryValue value       = BinaryValue.create("row value");
         final GetProcessor processor  = new GetProcessor(client, plugin, data);
 
+        data.indexes          = new ArrayList<RiakPluginData.Index>();
         data.resolver         = "resolver-foo";
         data.outputRowMeta    = meta;
         data.valueFieldIndex  = 1;

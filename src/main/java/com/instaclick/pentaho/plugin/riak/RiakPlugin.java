@@ -12,6 +12,7 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import static com.instaclick.pentaho.plugin.riak.Messages.getString;
+import com.instaclick.pentaho.plugin.riak.RiakPluginMeta.SecondaryIndex;
 import com.instaclick.pentaho.plugin.riak.processor.Processor;
 import com.instaclick.pentaho.plugin.riak.processor.ProcessorFactory;
 import java.io.IOException;
@@ -128,7 +129,7 @@ public class RiakPlugin extends BaseStep implements StepInterface
         data.resolver        = resolver;
         data.vclock          = vclock;
         data.bucket          = bucket;
-        data.uri            = uri;
+        data.uri             = uri;
         data.mode            = mode;
         data.bucketType      = Const.isEmpty(bucketType) 
             ? Namespace.DEFAULT_BUCKET_TYPE
@@ -148,6 +149,23 @@ public class RiakPlugin extends BaseStep implements StepInterface
             if (data.contentTypeFieldIndex < 0 && mode == RiakPluginData.Mode.PUT) {
                 throw new RiakPluginException("Unable to retrieve Content-Type field : " + contentType);
             }
+        }
+
+        for (final SecondaryIndex i2 : meta.getSecondaryIndexes()) {
+            final String indexType   = environmentSubstitute(i2.getType());
+            final String fieldName   = environmentSubstitute(i2.getField());
+            final String indexName   = environmentSubstitute(i2.getIndex());
+            final Integer fieldIndex = data.outputRowMeta.indexOfValue(fieldName);
+
+            if (mode == RiakPluginData.Mode.PUT && fieldIndex < 0) {
+                throw new RiakPluginException("Unable to retrieve index field : " + fieldName);
+            }
+
+            if ( ! "int".endsWith(indexType) && ! "bin".endsWith(indexType)) {
+                throw new RiakPluginException("Unknown index type : " + indexType);
+            }
+
+            data.indexes.add(new RiakPluginData.Index(indexName, fieldIndex, indexType));
         }
 
         if (mode == RiakPluginData.Mode.PUT && data.valueFieldIndex < 0) {

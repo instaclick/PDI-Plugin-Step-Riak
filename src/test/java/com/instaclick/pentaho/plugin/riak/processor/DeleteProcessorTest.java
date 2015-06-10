@@ -14,15 +14,18 @@ public class DeleteProcessorTest
     RiakClient client;
     RiakPlugin plugin;
     RiakPluginData data;
+    RowMetaInterface rowMeta;
 
     @Before
     public void setUp()
     {
-        client          = mock(RiakClient.class, RETURNS_MOCKS);
-        data            = mock(RiakPluginData.class);
-        plugin          = mock(RiakPlugin.class);
-        data.bucket     = "test_bucket";
-        data.bucketType = "test_type";
+        client              = mock(RiakClient.class, RETURNS_MOCKS);
+        rowMeta             = mock(RowMetaInterface.class);
+        data                = mock(RiakPluginData.class);
+        plugin              = mock(RiakPlugin.class);
+        data.bucket         = "test_bucket";
+        data.bucketType     = "test_type";
+        data.outputRowMeta  = rowMeta;
     }
 
     @Test
@@ -31,16 +34,17 @@ public class DeleteProcessorTest
         final String value              = null;
         final String key                = "riak_key";
         final Object[] row              = new Object[] {key, value};
-        final RowMetaInterface meta     = mock(RowMetaInterface.class);
         final DeleteProcessor processor = new DeleteProcessor(client, plugin, data);
 
         data.keyFieldIndex = 0;
-        data.outputRowMeta = meta;
+
+        when(rowMeta.getString(eq(row), eq(data.keyFieldIndex)))
+            .thenReturn(key);
 
         assertTrue(processor.process(row));
 
         //verify(client, only()).delete(eq(data.bucket), eq(key));
-        verify(plugin, only()).putRow(eq(meta), eq(row));
+        verify(plugin, only()).putRow(eq(rowMeta), eq(row));
     }
 
     @Test

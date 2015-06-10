@@ -4,12 +4,10 @@ package com.instaclick.pentaho.plugin.riak;
 import com.basho.riak.client.core.query.Namespace;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
-import org.pentaho.di.core.Counter;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
@@ -36,16 +34,21 @@ import org.w3c.dom.Node;
 
 public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
 {
-    private static final String FIELD_BUCKET_TYPE   = "bucket_type";
-    private static final String FIELD_CONTENT_TYPE  = "content_type";
-    private static final String FIELD_HOST          = "host";
-    private static final String FIELD_PORT          = "port";
-    private static final String FIELD_BUCKET        = "bucket";
-    private static final String FIELD_RESOLVER      = "resolver";
-    private static final String FIELD_VCLOCK        = "vclock";
-    private static final String FIELD_VALUE         = "value";
-    private static final String FIELD_KEY           = "key";
-    private static final String FIELD_MODE          = "mode";
+    private static final String FIELD_SECONDARY_INDEXES = "secondary_index";
+    private static final String FIELD_SECONDARY_ITEM    = "item";
+    private static final String FIELD_SECONDARY_FIELD   = "field";
+    private static final String FIELD_SECONDARY_INDEX   = "index";
+    private static final String FIELD_SECONDARY_TYPE    = "type";
+    private static final String FIELD_CONTENT_TYPE      = "content_type";
+    private static final String FIELD_BUCKET_TYPE       = "bucket_type";
+    private static final String FIELD_HOST              = "host";
+    private static final String FIELD_PORT              = "port";
+    private static final String FIELD_BUCKET            = "bucket";
+    private static final String FIELD_RESOLVER          = "resolver";
+    private static final String FIELD_VCLOCK            = "vclock";
+    private static final String FIELD_VALUE             = "value";
+    private static final String FIELD_KEY               = "key";
+    private static final String FIELD_MODE              = "mode";
 
     private final List<SecondaryIndex> secondaryIndexes = new ArrayList<SecondaryIndex>();
     private RiakPluginData.Mode mode = RiakPluginData.Mode.GET;
@@ -132,6 +135,14 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             valueField.setOrigin(name);
             inputRowMeta.addValueMeta(contentTypeField);
         }
+
+        for (final SecondaryIndex e2 : getSecondaryIndexes()) {
+            final Integer indexType            = "int".equals(e2.type) ? ValueMeta.TYPE_INTEGER : ValueMeta.TYPE_STRING;
+            final ValueMetaInterface indexMeta = new ValueMeta(e2.field, indexType);
+
+            valueField.setOrigin(name);
+            inputRowMeta.addValueMeta(indexMeta);
+        }
     }
 
     @Override
@@ -166,6 +177,16 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_PORT, getPort()));
         bufer.append("   ").append(XMLHandler.addTagValue(FIELD_KEY, getKey()));
 
+        bufer.append("    <" + FIELD_SECONDARY_INDEXES + ">").append(Const.CR);
+        for (SecondaryIndex item : getSecondaryIndexes()) {
+            bufer.append("      <" + FIELD_SECONDARY_ITEM + ">").append(Const.CR);
+            bufer.append("        ").append(XMLHandler.addTagValue(FIELD_SECONDARY_FIELD, item.getField()));
+            bufer.append("        ").append(XMLHandler.addTagValue(FIELD_SECONDARY_INDEX, item.getIndex()));
+            bufer.append("        ").append(XMLHandler.addTagValue(FIELD_SECONDARY_TYPE, item.getType()));
+            bufer.append("      </" + FIELD_SECONDARY_ITEM + ">").append(Const.CR);
+        }
+        bufer.append("    </" + FIELD_SECONDARY_INDEXES + ">").append(Const.CR);
+
         return bufer.toString();
     }
 
@@ -183,6 +204,20 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             setUri(XMLHandler.getTagValue(stepnode, FIELD_HOST));
             setPort(XMLHandler.getTagValue(stepnode, FIELD_PORT));
             setKey(XMLHandler.getTagValue(stepnode, FIELD_KEY));
+
+            final Node binding  = XMLHandler.getSubNode(stepnode, FIELD_SECONDARY_INDEXES);
+            final Integer count = XMLHandler.countNodes(binding, FIELD_SECONDARY_ITEM);
+
+            clearSecondaryIndex();
+
+            for (int i = 0; i < count; i++) {
+                final Node lnode         = XMLHandler.getSubNodeByNr(binding, FIELD_SECONDARY_ITEM, i);
+                final String indexField  = XMLHandler.getTagValue(lnode, FIELD_SECONDARY_FIELD);
+                final String indexName   = XMLHandler.getTagValue(lnode, FIELD_SECONDARY_INDEX);
+                final String indexType   = XMLHandler.getTagValue(lnode, FIELD_SECONDARY_TYPE);
+
+                addSecondaryIndex(indexName, indexField, indexType);
+            }
 
         } catch (Exception e) {
             throw new KettleXMLException("Unable to read step info from XML node", e);
@@ -203,6 +238,16 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             setUri(rep.getStepAttributeString(idStep, FIELD_HOST));
             setPort(rep.getStepAttributeString(idStep, FIELD_PORT));
             setKey(rep.getStepAttributeString(idStep, FIELD_KEY));
+
+            clearSecondaryIndex();
+
+            for (int i = 0; i < rep.countNrStepAttributes(idStep, FIELD_SECONDARY_ITEM); i++) {
+                final String indexField  = rep.getStepAttributeString(idStep, i, FIELD_SECONDARY_FIELD);
+                final String indexName   = rep.getStepAttributeString(idStep, i, FIELD_SECONDARY_INDEX);
+                final String indexType   = rep.getStepAttributeString(idStep, i, FIELD_SECONDARY_TYPE);
+
+                addSecondaryIndex(indexName, indexField, indexType);
+            }
 
         } catch (KettleDatabaseException dbe) {
             throw new KettleException("error reading step with id_step=" + idStep + " from the repository", dbe);
@@ -225,6 +270,14 @@ public class RiakPluginMeta extends BaseStepMeta implements StepMetaInterface
             rep.saveStepAttribute(idTransformation, idStep, FIELD_HOST, getUri());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_PORT, getPort());
             rep.saveStepAttribute(idTransformation, idStep, FIELD_KEY, getKey());
+
+            for (int i = 0; i < getSecondaryIndexes().size(); i++) {
+                final SecondaryIndex item = getSecondaryIndexes().get(i);
+
+                rep.saveStepAttribute(idTransformation, idStep, i, FIELD_SECONDARY_FIELD, item.getField());
+                rep.saveStepAttribute(idTransformation, idStep, i, FIELD_SECONDARY_INDEX, item.getIndex());
+                rep.saveStepAttribute(idTransformation, idStep, i, FIELD_SECONDARY_TYPE, item.getType());
+            }
 
         } catch (KettleDatabaseException dbe) {
             throw new KettleException("Unable to save step information to the repository, id_step=" + idStep, dbe);

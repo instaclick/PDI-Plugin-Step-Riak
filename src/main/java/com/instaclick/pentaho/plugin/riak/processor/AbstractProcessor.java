@@ -5,6 +5,8 @@ import com.basho.riak.client.core.query.Location;
 import com.basho.riak.client.core.query.Namespace;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract class AbstractProcessor implements Processor
 {
@@ -32,7 +34,7 @@ abstract class AbstractProcessor implements Processor
     protected String getRiakKey(final Object[] r) throws Exception
     {
         if (hasRiakKey(r)) {
-            return (r[data.keyFieldIndex] == null) ? null : r[data.keyFieldIndex].toString();
+            return rowGetStringValue(r, data.keyFieldIndex);
         }
 
         logUndefinedRow(r, "Invalid key row", "ICRiakPlugin001");
@@ -43,7 +45,7 @@ abstract class AbstractProcessor implements Processor
     protected String getRiakValue(final Object[] r) throws Exception
     {
         if (hasRiakValue(r)) {
-            return (r[data.valueFieldIndex] == null) ? null : r[data.valueFieldIndex].toString();
+            return rowGetStringValue(r, data.valueFieldIndex);
         }
 
         logUndefinedRow(r, "Invalid value row", "ICRiakPlugin002");
@@ -63,7 +65,7 @@ abstract class AbstractProcessor implements Processor
     protected String getRiakContentType(final Object[] r) throws Exception
     {
         if (hasRiakContentType(r)) {
-            return (r[data.contentTypeFieldIndex] == null) ? null : r[data.contentTypeFieldIndex].toString();
+            return rowGetStringValue(r, data.contentTypeFieldIndex);
         }
 
         return null;
@@ -87,6 +89,24 @@ abstract class AbstractProcessor implements Processor
     protected boolean hasRiakContentType(final Object[] r) throws Exception
     {
         return rowContains(r, data.contentTypeFieldIndex);
+    }
+
+    protected Long rowGetIntegerValue(final Object[] r, final Integer index) throws Exception
+    {
+        if ( ! rowContains(r, index)) {
+            return null;
+        }
+
+        return data.outputRowMeta.getInteger(r, index);
+    }
+
+    protected String rowGetStringValue(final Object[] r, final Integer index) throws Exception
+    {
+        if ( ! rowContains(r, index)) {
+            return null;
+        }
+
+        return data.outputRowMeta.getString(r, index);
     }
 
     protected boolean rowContains(final Object[] r, final Integer index) throws Exception
