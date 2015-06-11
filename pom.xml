@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.instaclick</groupId>
     <artifactId>ic-riak-plugin</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.3.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>ic-riak-plugin</name>
     <properties>
@@ -77,23 +77,9 @@
         </dependency>
     </dependencies>
     <repositories>
-         <repository>
+        <repository>
             <id>pentaho-releases</id>
             <url>http://repository.pentaho.org/artifactory/repo/</url>
-          </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>cdh-build</name>
-            <url>https://repository.cloudera.com/artifactory/cdh-build</url>
-        </repository>
-        <repository>
-            <snapshots />
-            <id>snapshots</id>
-            <name>libs-snapshot</name>
-            <url>https://repository.cloudera.com/artifactory/libs-snapshot</url>
         </repository>
         <repository>
             <id>mvnrepository</id>
@@ -147,15 +133,15 @@
                         <phase>package</phase>
                         <configuration>
                             <target name="package-riak-plugin">
-                                <delete dir="${project.plugin.deploy}"/>
-                                <mkdir dir="${project.plugin.deploy}"/>
+                                <delete dir="${project.plugin.deploy}" />
+                                <mkdir dir="${project.plugin.deploy}" />
                                 <copy tofile="${project.plugin.deploy}/ic-riak-plugin.jar" file="${project.build.directory}/${project.build.finalName}-dep.jar" />
                                 <copy todir="${project.plugin.deploy}">
                                     <fileset dir="${basedir}/src/main/resources">
                                         <include name="**/*.*" />
                                     </fileset>
                                 </copy>
-                                <zip destfile="${project.build.directory}/ic-riak-plugin-pdi-${project.version}.zip" basedir="${project.plugin.zip}"/>
+                                <zip destfile="${project.build.directory}/ic-riak-plugin-pdi-${project.version}.zip" basedir="${project.plugin.zip}" />
                             </target>
                         </configuration>
                         <goals>
@@ -167,7 +153,7 @@
                         <phase>install</phase>
                         <configuration>
                             <target name="install-riak-plugin" if="pdiInstall">
-                                <delete dir="${pdiInstallDir}"/>
+                                <delete dir="${pdiInstallDir}" />
                                 <mkdir dir="${pdiInstallDir}" />
                                 <copy todir="${pdiInstallDir}">
                                     <fileset dir="${project.plugin.deploy}" includes="**/*.*" />
@@ -177,6 +163,28 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>de.jutzig</groupId>
+                <artifactId>github-release-plugin</artifactId>
+                <version>1.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>release</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <serverId>github</serverId>
+                            <overwriteArtifact>true</overwriteArtifact>
+                            <artifact>${project.build.directory}/ic-riak-plugin-pdi-${project.version}.zip</artifact>
+                            <description>See https://github.com/instaclick/PDI-Plugin-Step-Riak for details</description>
+                            <releaseName>v${project.version}</releaseName>
+                            <tag>v${project.version}</tag>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -214,4 +222,10 @@
             </plugin>
         </plugins>
     </build>
+    <scm>
+        <tag>HEAD</tag>
+        <url>https://github.com/instaclick/PDI-Plugin-Step-Riak</url>
+        <connection>scm:git:https://github.com/instaclick/PDI-Plugin-Step-Riak.git</connection>
+        <developerConnection>scm:git:https://github.com/instaclick/PDI-Plugin-Step-Riak.git</developerConnection>
+    </scm>
 </project>
