@@ -47,7 +47,7 @@ public class PutProcessor extends AbstractProcessor
         for (final RiakPluginData.Index item : data.indexes) {
 
             if ("int".endsWith(item.type)) {
-                final Long value             = rowGetIntegerValue(r, item.field);
+                final Long value             = getIntegerRowValue(r, item.field);
                 final LongIntIndex index     = indexes.getIndex(LongIntIndex.named(item.index));
 
                 index.add(value);
@@ -55,7 +55,7 @@ public class PutProcessor extends AbstractProcessor
                 continue;
             }
 
-            final String value         = rowGetStringValue(r, item.field);
+            final String value         = getStringRowValue(r, item.field);
             final StringBinIndex index = indexes.getIndex(StringBinIndex.named(item.index));
 
             index.add(value);

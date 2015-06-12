@@ -186,6 +186,35 @@ public class GetProcessorTest
         assertEquals(vClockBytes, result[2]);
     }
 
+    @Test
+    public void testAddRiakObjectDataWithVClock() throws Exception
+    {
+        final String key              = "bar";
+        final byte[] vClockBytes      = new byte[]{};
+        final RiakObject object       = new RiakObject();
+        final VClock vClock           = mock(VClock.class);
+        final RowMetaInterface meta   = mock(RowMetaInterface.class);
+        final Object[] row            = new Object[] {key, null, null};
+        final BinaryValue value       = BinaryValue.create("row value");
+        final GetProcessor processor  = new GetProcessor(client, plugin, data);
+
+        data.indexes          = new ArrayList<RiakPluginData.Index>();
+        data.resolver         = "resolver-foo";
+        data.outputRowMeta    = meta;
+        data.valueFieldIndex  = 1;
+        data.vclockFieldIndex = 2;
+
+        object.setValue(value);
+
+        when(vClock.getBytes()).thenReturn(vClockBytes);
+
+        final Object[] result = processor.addRiakObjectData(vClock, object, row);
+
+        assertEquals(key, result[0]);
+        assertEquals(value, result[1]);
+        assertEquals(vClockBytes, result[2]);
+    }
+
     @Test(expected = RiakPluginException.class)
     public void testPutRowToResolveSiblingsUndefinedResolverException() throws Exception
     {

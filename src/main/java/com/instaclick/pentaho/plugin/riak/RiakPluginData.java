@@ -27,7 +27,7 @@ public class RiakPluginData extends BaseStepData implements StepDataInterface
         final public String index;
         final public String type;
 
-        Index(final String index, final Integer field, final String type)
+        public Index(final String index, final Integer field, final String type)
         {
             this.index = index;
             this.field = field;

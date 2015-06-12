@@ -33,83 +33,65 @@ abstract class AbstractProcessor implements Processor
 
     protected String getRiakKey(final Object[] r) throws Exception
     {
-        if (hasRiakKey(r)) {
-            return rowGetStringValue(r, data.keyFieldIndex);
+        if ( ! hasRiakKey(r)) {
+            logUndefinedRow(r, "Invalid key row", "ICRiakPlugin001");
         }
 
-        logUndefinedRow(r, "Invalid key row", "ICRiakPlugin001");
-
-        return null;
+        return getStringRowValue(r, data.keyFieldIndex);
     }
 
     protected String getRiakValue(final Object[] r) throws Exception
     {
-        if (hasRiakValue(r)) {
-            return rowGetStringValue(r, data.valueFieldIndex);
+        if ( ! rowValueContains(r, data.valueFieldIndex)) {
+            logUndefinedRow(r, "Invalid value row", "ICRiakPlugin002");
         }
 
-        logUndefinedRow(r, "Invalid value row", "ICRiakPlugin002");
-
-        return null;
+        return getStringRowValue(r, data.valueFieldIndex);
     }
 
     protected byte[] getRiakVClock(final Object[] r) throws Exception
     {
-        if (hasRiakVClock(r)) {
-            return ((r[data.vclockFieldIndex] == null) ? null : (byte[]) r[data.vclockFieldIndex]);
-        }
-
-        return null;
+        return getBinaryRowValue(r, data.vclockFieldIndex);
     }
 
     protected String getRiakContentType(final Object[] r) throws Exception
     {
-        if (hasRiakContentType(r)) {
-            return rowGetStringValue(r, data.contentTypeFieldIndex);
-        }
-
-        return null;
-    }
-
-    protected boolean hasRiakVClock(final Object[] r) throws Exception
-    {
-        return rowContains(r, data.vclockFieldIndex);
+        return getStringRowValue(r, data.contentTypeFieldIndex);
     }
 
     protected boolean hasRiakKey(final Object[] r) throws Exception
     {
-        return rowContains(r, data.keyFieldIndex);
+        return rowValueContains(r, data.keyFieldIndex);
     }
 
-    protected boolean hasRiakValue(final Object[] r) throws Exception
+    protected Long getIntegerRowValue(final Object[] r, final Integer index) throws Exception
     {
-        return rowContains(r, data.valueFieldIndex);
-    }
-
-    protected boolean hasRiakContentType(final Object[] r) throws Exception
-    {
-        return rowContains(r, data.contentTypeFieldIndex);
-    }
-
-    protected Long rowGetIntegerValue(final Object[] r, final Integer index) throws Exception
-    {
-        if ( ! rowContains(r, index)) {
+        if ( ! rowValueContains(r, index)) {
             return null;
         }
 
         return data.outputRowMeta.getInteger(r, index);
     }
 
-    protected String rowGetStringValue(final Object[] r, final Integer index) throws Exception
+    protected String getStringRowValue(final Object[] r, final Integer index) throws Exception
     {
-        if ( ! rowContains(r, index)) {
+        if ( ! rowValueContains(r, index)) {
             return null;
         }
 
         return data.outputRowMeta.getString(r, index);
     }
 
-    protected boolean rowContains(final Object[] r, final Integer index) throws Exception
+    protected byte[] getBinaryRowValue(final Object[] r, final Integer index) throws Exception
+    {
+        if ( ! rowValueContains(r, index)) {
+            return null;
+        }
+
+        return data.outputRowMeta.getBinary(r, index);
+    }
+
+    protected boolean rowValueContains(final Object[] r, final Integer index) throws Exception
     {
         if (index == null || index < 0) {
             return false;
