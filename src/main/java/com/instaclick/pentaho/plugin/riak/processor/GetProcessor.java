@@ -69,7 +69,7 @@ public class GetProcessor extends AbstractProcessor
             r = RowDataUtil.addValueData(r, data.vclockFieldIndex, vClock.getBytes());
         }
 
-        if (data.contentTypeFieldIndex != null && object.getContentType() != null) {
+        if (data.contentTypeFieldIndex != null) {
             r = RowDataUtil.addValueData(r, data.contentTypeFieldIndex, object.getContentType());
         }
 

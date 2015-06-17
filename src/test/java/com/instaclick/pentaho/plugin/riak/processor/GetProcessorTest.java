@@ -5,10 +5,14 @@ import com.basho.riak.client.api.cap.VClock;
 import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.api.commands.kv.FetchValue.Response;
 import com.basho.riak.client.core.query.RiakObject;
+import com.basho.riak.client.core.query.indexes.LongIntIndex;
+import com.basho.riak.client.core.query.indexes.RiakIndexes;
+import com.basho.riak.client.core.query.indexes.StringBinIndex;
 import com.basho.riak.client.core.util.BinaryValue;
 import com.google.common.collect.Lists;
 import com.instaclick.pentaho.plugin.riak.RiakPlugin;
 import com.instaclick.pentaho.plugin.riak.RiakPluginData;
+import com.instaclick.pentaho.plugin.riak.RiakPluginData.Index;
 import com.instaclick.pentaho.plugin.riak.RiakPluginException;
 import com.instaclick.pentaho.plugin.riak.Whitebox;
 import java.util.ArrayList;
@@ -213,6 +217,64 @@ public class GetProcessorTest
         assertEquals(key, result[0]);
         assertEquals(value, result[1]);
         assertEquals(vClockBytes, result[2]);
+    }
+
+    @Test
+    public void testAddRiakObjectDataWithContentType() throws Exception
+    {
+        final String key              = "bar";
+        final String contentType      = "text/plain";
+        final RiakObject object       = new RiakObject();
+        final VClock vClock           = mock(VClock.class);
+        final RowMetaInterface meta   = mock(RowMetaInterface.class);
+        final Object[] row            = new Object[] {key, null, null};
+        final BinaryValue value       = BinaryValue.create("row value");
+        final GetProcessor processor  = new GetProcessor(client, plugin, data);
+
+        data.indexes               = new ArrayList<RiakPluginData.Index>();
+        data.outputRowMeta         = meta;
+        data.valueFieldIndex       = 1;
+        data.contentTypeFieldIndex = 2;
+
+        object.setValue(value);
+        object.setContentType(contentType);
+
+        final Object[] result = processor.addRiakObjectData(vClock, object, row);
+
+        assertEquals(key, result[0]);
+        assertEquals(value, result[1]);
+        assertEquals(contentType, result[2]);
+    }
+
+    @Test
+    public void testAddRiakObjectDataWithIndexes() throws Exception
+    {
+        final String key             = "bar";
+        final RiakObject object      = new RiakObject();
+        final VClock vClock          = mock(VClock.class);
+        final RiakIndexes indexes    = object.getIndexes();
+        final RowMetaInterface meta  = mock(RowMetaInterface.class);
+        final Object[] row           = new Object[] {key, null};
+        final BinaryValue value      = BinaryValue.create("row value");
+        final Index binIndex         = new Index("string_index", 2, "bin");
+        final Index intIndex         = new Index("integer_index", 3, "int");
+        final GetProcessor processor = new GetProcessor(client, plugin, data);
+
+        data.indexes               = Lists.newArrayList(binIndex, intIndex);
+        data.outputRowMeta         = meta;
+        data.valueFieldIndex       = 1;
+        data.contentTypeFieldIndex = 2;
+
+        object.setValue(value);
+        indexes.getIndex(LongIntIndex.named("integer_index")).add(44444L);
+        indexes.getIndex(StringBinIndex.named("string_index")).add("33333");
+
+        final Object[] result = processor.addRiakObjectData(vClock, object, row);
+
+        assertEquals(key, result[0]);
+        assertEquals(value, result[1]);
+        assertEquals("33333", result[2]);
+        assertEquals(44444L, result[3]);
     }
 
     @Test(expected = RiakPluginException.class)
