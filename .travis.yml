@@ -1,6 +1,18 @@
 language: java
 
-install: mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin -DskipTests=true -B -V clean
-script: mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin test
-# coveralls
-after_success: mvn clean cobertura:cobertura coveralls:cobertura
+install:
+    - mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin -DskipTests=true -B -V clean
+
+script:
+    - mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin package
+
+after_success:
+    - mvn clean cobertura:cobertura coveralls:cobertura
+
+deploy:
+    provider: releases
+    api_key: $GITHUB_OAUTH_TOKEN
+    file: ./target/ic-riak-plugin-pdi-*.zip
+    skip_cleanup: true
+    on:
+        tags: true
