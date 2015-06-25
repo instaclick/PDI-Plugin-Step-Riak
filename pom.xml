@@ -141,8 +141,8 @@
                                         <include name="**/*.*" />
                                     </fileset>
                                 </copy>
-                                <zip destfile="${project.build.directory}/ic-riak-plugin-pdi-${project.version}.zip" basedir="${project.plugin.zip}" />
-                                <copy tofile="${project.build.directory}/ic-riak-plugin.zip" file="${project.build.directory}/ic-riak-plugin-pdi-${project.version}.zip" />
+                                <zip destfile="${project.build.directory}/ic-riak-plugin-${project.version}.zip" basedir="${project.plugin.zip}" />
+                                <copy tofile="${project.build.directory}/ic-riak-plugin.zip" file="${project.build.directory}/ic-riak-plugin-${project.version}.zip" />
                             </target>
                         </configuration>
                         <goals>
