@@ -16,3 +16,6 @@ deploy:
     skip_cleanup: true
     on:
         tags: true
+env:
+  global:
+    secure: OqqcOYCPHdBfoVGR0GxUcG/VaUgjov+jRnuUN2mWdDEbRvzMcrQ6UzLP8fSa9UE9auW7B3VYPBzE4ScdhaiIkaSRh87KziJsl/61EraZLTp1DAYBXIKQuDA49EGQFKF3vktXWtqoUPpdlAeOSG6JXqo7lF61MmJHAMEmnUE0Sjc=
