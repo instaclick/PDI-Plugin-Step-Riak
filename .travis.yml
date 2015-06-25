@@ -4,10 +4,10 @@ install:
     - mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin -DskipTests=true -B -V clean
 
 script:
-    - mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin package
+    - mvn -DpdiInstall=false -DpdiInstallDir=./target/pdi/plugins/steps/ic-riak-plugin clean package
 
 after_success:
-    - mvn clean cobertura:cobertura coveralls:cobertura
+    - mvn cobertura:cobertura coveralls:cobertura
 
 deploy:
     provider: releases
